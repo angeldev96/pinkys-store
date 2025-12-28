@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useMemo } from 'react';
 import { Sparkles } from 'lucide-react';
 import { Product, products } from '@/data/products';

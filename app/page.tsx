@@ -1,6 +1,6 @@
+"use client";
+
 import { useState } from 'react';
-import { Toaster } from '@/components/ui/sonner';
-import { toast } from 'sonner';
 import Header from '@/components/Header';
 import Hero from '@/components/Hero';
 import Catalog from '@/components/Catalog';
@@ -9,7 +9,7 @@ import Footer from '@/components/Footer';
 import { useCart } from '@/hooks/useCart';
 import { Product } from '@/data/products';
 
-const Index = () => {
+export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const {
     cartItems,
@@ -25,29 +25,20 @@ const Index = () => {
 
   const handleAddToCart = (product: Product) => {
     addToCart(product);
-    toast.success(`${product.name} añadido al carrito`, {
-      description: 'Continúa comprando o finaliza tu pedido',
-      action: {
-        label: 'Ver Carrito',
-        onClick: openCart
-      }
-    });
   };
 
   return (
     <div className="min-h-screen bg-background">
-      <Toaster position="bottom-right" richColors />
-      
-      <Header 
+      <Header
         cartCount={totalItems}
         onCartClick={openCart}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
       />
-      
+
       <main>
         <Hero />
-        <Catalog 
+        <Catalog
           searchQuery={searchQuery}
           onAddToCart={handleAddToCart}
         />
@@ -65,6 +56,4 @@ const Index = () => {
       />
     </div>
   );
-};
-
-export default Index;
+}

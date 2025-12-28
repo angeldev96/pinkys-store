@@ -1,5 +1,4 @@
 import { Instagram, Facebook, Twitter, Mail, MapPin, Phone, Heart } from 'lucide-react';
-import logo from '@/assets/pinkys-logo.jpg';
 
 const Footer = () => {
   return (
@@ -9,9 +8,9 @@ const Footer = () => {
           {/* Brand */}
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <img 
-                src={logo} 
-                alt="Pinky's Store" 
+              <img
+                src="/pinkys-logo.jpg"
+                alt="Pinky's Store"
                 className="w-12 h-12 rounded-full object-cover"
               />
               <div>

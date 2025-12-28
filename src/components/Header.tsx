@@ -1,5 +1,4 @@
 import { Search, ShoppingBag, User, Sparkles } from 'lucide-react';
-import logo from '@/assets/pinkys-logo.jpg';
 
 interface HeaderProps {
   cartCount: number;
@@ -15,9 +14,9 @@ const Header = ({ cartCount, onCartClick, searchQuery, onSearchChange }: HeaderP
         <div className="flex items-center justify-between gap-4">
           {/* Logo */}
           <div className="flex items-center gap-2 shrink-0">
-            <img 
-              src={logo} 
-              alt="Pinky's Store" 
+            <img
+              src="/pinkys-logo.jpg"
+              alt="Pinky's Store"
               className="h-12 w-12 object-cover rounded-full border-2 border-primary/20"
             />
             <div className="hidden sm:block">

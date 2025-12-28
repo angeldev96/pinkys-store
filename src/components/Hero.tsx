@@ -1,5 +1,4 @@
 import { Sparkles, ArrowRight } from 'lucide-react';
-import heroBanner from '@/assets/hero-banner.jpg';
 
 const Hero = () => {
   const scrollToCatalog = () => {
@@ -10,9 +9,9 @@ const Hero = () => {
     <section className="relative overflow-hidden">
       {/* Background Image with Overlay */}
       <div className="absolute inset-0">
-        <img 
-          src={heroBanner} 
-          alt="Cosméticos premium" 
+        <img
+          src="/hero-banner.jpg"
+          alt="Cosméticos premium"
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/70 to-background/40" />
