@@ -43,6 +43,8 @@ export default function AdminLoginPage() {
         return;
       }
 
+      // Small delay to ensure session is saved
+      await new Promise(resolve => setTimeout(resolve, 100));
       router.push('/admin/dashboard');
       router.refresh();
     } catch (err: any) {
