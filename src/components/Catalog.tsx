@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { Sparkles } from 'lucide-react';
 import { Product, getProducts, searchProducts } from '@/data/products';
 import ProductCard from './ProductCard';
+import { ProductDetailDrawer } from './ProductDetailDrawer';
 
 type Category = 'todo' | 'maquillaje' | 'joyeria' | 'perfumes' | 'accesorios';
 
@@ -24,6 +25,8 @@ const Catalog = ({ searchQuery, onAddToCart }: CatalogProps) => {
   const [activeCategory, setActiveCategory] = useState<Category>('todo');
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   // Fetch products
   useEffect(() => {
@@ -61,6 +64,17 @@ const Catalog = ({ searchQuery, onAddToCart }: CatalogProps) => {
 
     return filtered;
   }, [activeCategory, searchQuery, products]);
+
+  const handleViewProduct = (product: Product) => {
+    setSelectedProduct(product);
+    setIsDrawerOpen(true);
+  };
+
+  const handleCloseDrawer = () => {
+    setIsDrawerOpen(false);
+    // Delay clearing the product to allow animation to complete
+    setTimeout(() => setSelectedProduct(null), 300);
+  };
 
   return (
     <section id="catalog" className="py-12 md:py-16">
@@ -108,6 +122,7 @@ const Catalog = ({ searchQuery, onAddToCart }: CatalogProps) => {
                 key={product.id}
                 product={product}
                 onAddToCart={onAddToCart}
+                onView={handleViewProduct}
               />
             ))}
           </div>
@@ -125,6 +140,14 @@ const Catalog = ({ searchQuery, onAddToCart }: CatalogProps) => {
           </div>
         )}
       </div>
+
+      {/* Product Detail Drawer (Mobile Only) */}
+      <ProductDetailDrawer
+        isOpen={isDrawerOpen}
+        onClose={handleCloseDrawer}
+        product={selectedProduct}
+        onAddToCart={onAddToCart}
+      />
     </section>
   );
 };

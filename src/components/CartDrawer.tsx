@@ -1,4 +1,4 @@
-import { X, Plus, Minus, ShoppingBag, Trash2 } from 'lucide-react';
+import { X, Plus, Minus, ShoppingBag, Trash2, MessageCircle } from 'lucide-react';
 import { CartItem } from '@/data/products';
 
 interface CartDrawerProps {
@@ -10,6 +10,8 @@ interface CartDrawerProps {
   totalPrice: number;
 }
 
+const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '50400000000';
+
 const CartDrawer = ({
   isOpen,
   onClose,
@@ -20,107 +22,135 @@ const CartDrawer = ({
 }: CartDrawerProps) => {
   if (!isOpen) return null;
 
+  const handleWhatsAppOrder = () => {
+    // Create formatted message for WhatsApp
+    let message = '🌸 *PEDIDO PINKY\'S STORE*\n\n';
+    message += 'Me gustaría ordenar los siguientes productos:\n\n';
+
+    items.forEach((item, index) => {
+      message += `${index + 1}. *${item.name}*\n`;
+      message += `   Cantidad: ${item.quantity}\n`;
+      message += `   Precio: L${(item.price * item.quantity).toFixed(2)}\n\n`;
+    });
+
+    message += `💰 *TOTAL: L${totalPrice.toFixed(2)}*\n\n`;
+    message += '¿Me puedes confirmar la disponibilidad? 🙏';
+
+    // Encode message and create WhatsApp link
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
+
+    // Open WhatsApp in new tab
+    window.open(whatsappUrl, '_blank');
+  };
+
+  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+
   return (
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-foreground/50 backdrop-blur-sm z-50"
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
         onClick={onClose}
       />
 
       {/* Drawer */}
-      <div className="fixed right-0 top-0 h-full w-full max-w-md bg-card z-50 shadow-2xl slide-in-right flex flex-col">
+      <div className="fixed right-0 top-0 h-full w-full sm:max-w-md bg-white z-50 shadow-2xl flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-3 sm:p-4 border-b border-border">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <ShoppingBag className="w-5 h-5 text-primary" />
-            <h2 className="font-display text-lg sm:text-xl font-semibold text-foreground">
-              Tu Carrito
-            </h2>
-            <span className="bg-secondary text-secondary-foreground px-2 py-0.5 rounded-full text-sm">
-              {items.length}
-            </span>
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-pink-100 rounded-lg">
+              <ShoppingBag className="w-5 h-5 text-pink-600" />
+            </div>
+            <div>
+              <h2 className="font-display text-lg font-semibold text-gray-900">
+                Mi Carrito
+              </h2>
+              <p className="text-sm text-gray-500">{itemCount} {itemCount === 1 ? 'producto' : 'productos'}</p>
+            </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-secondary rounded-full transition-colors active:scale-95"
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors active:scale-95"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-3 sm:p-4">
+        <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
           {items.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center px-4">
-              <ShoppingBag className="w-14 h-14 sm:w-16 sm:h-16 text-muted-foreground/30 mb-4" />
-              <p className="text-muted-foreground text-base sm:text-lg">Tu carrito está vacío</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                ¡Agrega algunos productos!
+              <div className="w-20 h-20 bg-pink-100 rounded-full flex items-center justify-center mb-4">
+                <ShoppingBag className="w-10 h-10 text-pink-600" />
+              </div>
+              <p className="text-gray-900 text-lg font-medium mb-1">Tu carrito está vacío</p>
+              <p className="text-sm text-gray-500 mb-6">
+                Agrega productos que te interesen
               </p>
               <button
                 onClick={onClose}
-                className="btn-primary mt-6 min-h-[44px]"
+                className="px-6 py-3 bg-pink-600 hover:bg-pink-700 text-white font-medium rounded-lg transition touch-target"
               >
-                Seguir Comprando
+                Ver Productos
               </button>
             </div>
           ) : (
-            <div className="space-y-3 sm:space-y-4">
+            <div className="space-y-3">
               {items.map((item) => (
                 <div
                   key={item.id}
-                  className="flex gap-3 sm:gap-4 bg-secondary/30 rounded-xl p-3 fade-in"
+                  className="bg-white rounded-xl p-3 shadow-sm border border-gray-100"
                 >
-                  {/* Image */}
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden shrink-0">
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+                  <div className="flex gap-3">
+                    {/* Image */}
+                    <div className="w-20 h-20 rounded-lg overflow-hidden shrink-0 bg-gray-100">
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
 
-                  {/* Details */}
-                  <div className="flex-1 min-w-0 flex flex-col justify-between">
-                    <div>
-                      <h3 className="font-medium text-sm sm:text-base text-foreground line-clamp-1">
+                    {/* Details */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-gray-900 text-sm line-clamp-2">
                         {item.name}
                       </h3>
-                      <p className="text-xs sm:text-sm text-muted-foreground capitalize">
+                      <p className="text-xs text-gray-500 capitalize mt-0.5">
                         {item.category}
                       </p>
-                      <p className="font-bold text-primary text-sm sm:text-base mt-1">
-                        L{(item.price * item.quantity).toFixed(2)}
+                      <p className="font-bold text-pink-600 text-base mt-1">
+                        L{item.price.toFixed(2)}
                       </p>
                     </div>
+                  </div>
 
-                    {/* Quantity Controls - Stacked on mobile */}
-                    <div className="flex items-center justify-between mt-2 gap-2">
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
-                          className="p-2 sm:p-1.5 bg-card rounded-md hover:bg-secondary transition-colors active:scale-95 min-w-[36px] min-h-[36px] sm:min-w-0 sm:min-h-0 flex items-center justify-center"
-                        >
-                          <Minus className="w-3.5 h-3.5 sm:w-3 sm:h-3" />
-                        </button>
-                        <span className="w-8 text-center text-sm font-medium">
-                          {item.quantity}
-                        </span>
-                        <button
-                          onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
-                          className="p-2 sm:p-1.5 bg-card rounded-md hover:bg-secondary transition-colors active:scale-95 min-w-[36px] min-h-[36px] sm:min-w-0 sm:min-h-0 flex items-center justify-center"
-                        >
-                          <Plus className="w-3.5 h-3.5 sm:w-3 sm:h-3" />
-                        </button>
-                      </div>
+                  {/* Quantity Controls */}
+                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                    <div className="flex items-center gap-1">
                       <button
-                        onClick={() => onRemove(item.id)}
-                        className="p-2 text-destructive hover:bg-destructive/10 rounded-md transition-colors active:scale-95 min-w-[36px] min-h-[36px] sm:min-w-0 sm:min-h-0 flex items-center justify-center"
+                        onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
+                        className="w-9 h-9 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors active:scale-95"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Minus className="w-4 h-4" />
+                      </button>
+                      <span className="w-10 text-center font-medium text-gray-900">
+                        {item.quantity}
+                      </span>
+                      <button
+                        onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
+                        className="w-9 h-9 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors active:scale-95"
+                      >
+                        <Plus className="w-4 h-4" />
                       </button>
                     </div>
+                    <button
+                      onClick={() => onRemove(item.id)}
+                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors active:scale-95"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
               ))}
@@ -130,27 +160,33 @@ const CartDrawer = ({
 
         {/* Footer */}
         {items.length > 0 && (
-          <div className="border-t border-border p-3 sm:p-4 space-y-3 sm:space-y-4 bg-card">
-            {/* Subtotal */}
-            <div className="flex justify-between items-center text-sm sm:text-base">
-              <span className="text-muted-foreground">Subtotal</span>
-              <span className="font-medium">L{totalPrice.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between items-center text-sm sm:text-base">
-              <span className="text-muted-foreground">Envío</span>
-              <span className="text-sm sm:text-base text-accent font-medium">Gratis</span>
-            </div>
-            <div className="flex justify-between items-center pt-2 sm:pt-3 border-t border-border">
-              <span className="font-display font-semibold text-base sm:text-lg">Total</span>
-              <span className="font-display font-bold text-lg sm:text-xl text-primary">
-                L{totalPrice.toFixed(2)}
-              </span>
+          <div className="border-t border-gray-200 p-4 bg-white shadow-lg">
+            {/* Order Summary */}
+            <div className="space-y-2 mb-4">
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-gray-600">Subtotal</span>
+                <span className="font-medium text-gray-900">L{totalPrice.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between items-center pt-3 border-t border-gray-200">
+                <span className="font-display font-semibold text-lg text-gray-900">Total</span>
+                <span className="font-display font-bold text-2xl text-pink-600">
+                  L{totalPrice.toFixed(2)}
+                </span>
+              </div>
             </div>
 
-            {/* Checkout Button */}
-            <button className="w-full btn-primary py-3 sm:py-3.5 text-sm sm:text-base min-h-[48px]">
-              Proceder al Pago
+            {/* WhatsApp Order Button */}
+            <button
+              onClick={handleWhatsAppOrder}
+              className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-4 rounded-xl transition flex items-center justify-center gap-3 touch-target shadow-lg shadow-green-500/20"
+            >
+              <MessageCircle className="w-5 h-5" />
+              Ordenar por WhatsApp
             </button>
+
+            <p className="text-xs text-gray-500 text-center mt-3">
+              Te contactaremos para confirmar tu pedido
+            </p>
           </div>
         )}
       </div>
