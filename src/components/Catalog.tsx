@@ -116,7 +116,7 @@ const Catalog = ({ searchQuery, onAddToCart }: CatalogProps) => {
             <p className="text-muted-foreground mt-4">Cargando productos...</p>
           </div>
         ) : filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 stagger-in">
             {filteredProducts.map((product) => (
               <ProductCard
                 key={product.id}

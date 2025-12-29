@@ -50,16 +50,16 @@ const CartDrawer = ({
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 fade-in"
         onClick={onClose}
       />
 
       {/* Drawer */}
-      <div className="fixed right-0 top-0 h-full w-full sm:max-w-md bg-white z-50 shadow-2xl flex flex-col">
+      <div className="fixed right-0 top-0 h-full w-full sm:max-w-md bg-white z-50 shadow-2xl flex flex-col slide-in-right">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-pink-100 rounded-lg">
+          <div className="flex items-center gap-3 fade-in">
+            <div className="p-2 bg-pink-100 rounded-lg fade-in-scale">
               <ShoppingBag className="w-5 h-5 text-pink-600" />
             </div>
             <div>
@@ -71,7 +71,7 @@ const CartDrawer = ({
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors active:scale-95"
+            className="p-2 hover:bg-gray-100 rounded-lg transition-all duration-200 scale-on-active"
           >
             <X className="w-5 h-5" />
           </button>
@@ -80,8 +80,8 @@ const CartDrawer = ({
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
           {items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center px-4">
-              <div className="w-20 h-20 bg-pink-100 rounded-full flex items-center justify-center mb-4">
+            <div className="flex flex-col items-center justify-center h-full text-center px-4 fade-in">
+              <div className="w-20 h-20 bg-pink-100 rounded-full flex items-center justify-center mb-4 fade-in-scale">
                 <ShoppingBag className="w-10 h-10 text-pink-600" />
               </div>
               <p className="text-gray-900 text-lg font-medium mb-1">Tu carrito está vacío</p>
@@ -90,17 +90,18 @@ const CartDrawer = ({
               </p>
               <button
                 onClick={onClose}
-                className="px-6 py-3 bg-pink-600 hover:bg-pink-700 text-white font-medium rounded-lg transition touch-target"
+                className="px-6 py-3 bg-pink-600 hover:bg-pink-700 text-white font-medium rounded-lg transition-all duration-200 touch-target scale-on-active"
               >
                 Ver Productos
               </button>
             </div>
           ) : (
-            <div className="space-y-3">
-              {items.map((item) => (
+            <div className="space-y-3 stagger-in">
+              {items.map((item, index) => (
                 <div
                   key={item.id}
-                  className="bg-white rounded-xl p-3 shadow-sm border border-gray-100"
+                  className="bg-white rounded-xl p-3 shadow-sm border border-gray-100 fade-in"
+                  style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <div className="flex gap-3">
                     {/* Image */}
@@ -131,7 +132,7 @@ const CartDrawer = ({
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
-                        className="w-9 h-9 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors active:scale-95"
+                        className="w-9 h-9 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-lg transition-all duration-200 scale-on-active"
                       >
                         <Minus className="w-4 h-4" />
                       </button>
@@ -140,14 +141,14 @@ const CartDrawer = ({
                       </span>
                       <button
                         onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
-                        className="w-9 h-9 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors active:scale-95"
+                        className="w-9 h-9 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-lg transition-all duration-200 scale-on-active"
                       >
                         <Plus className="w-4 h-4" />
                       </button>
                     </div>
                     <button
                       onClick={() => onRemove(item.id)}
-                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors active:scale-95"
+                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200 scale-on-active"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -160,14 +161,14 @@ const CartDrawer = ({
 
         {/* Footer */}
         {items.length > 0 && (
-          <div className="border-t border-gray-200 p-4 bg-white shadow-lg">
+          <div className="border-t border-gray-200 p-4 bg-white shadow-lg slide-in-up">
             {/* Order Summary */}
             <div className="space-y-2 mb-4">
-              <div className="flex justify-between items-center text-sm">
+              <div className="flex justify-between items-center text-sm fade-in">
                 <span className="text-gray-600">Subtotal</span>
                 <span className="font-medium text-gray-900">L{totalPrice.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between items-center pt-3 border-t border-gray-200">
+              <div className="flex justify-between items-center pt-3 border-t border-gray-200 fade-in">
                 <span className="font-display font-semibold text-lg text-gray-900">Total</span>
                 <span className="font-display font-bold text-2xl text-pink-600">
                   L{totalPrice.toFixed(2)}
@@ -178,13 +179,13 @@ const CartDrawer = ({
             {/* WhatsApp Order Button */}
             <button
               onClick={handleWhatsAppOrder}
-              className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-4 rounded-xl transition flex items-center justify-center gap-3 touch-target shadow-lg shadow-green-500/20"
+              className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-3 touch-target shadow-lg shadow-green-500/20 scale-on-active"
             >
               <MessageCircle className="w-5 h-5" />
               Ordenar por WhatsApp
             </button>
 
-            <p className="text-xs text-gray-500 text-center mt-3">
+            <p className="text-xs text-gray-500 text-center mt-3 fade-in">
               Te contactaremos para confirmar tu pedido
             </p>
           </div>

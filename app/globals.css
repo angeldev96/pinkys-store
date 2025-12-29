@@ -156,7 +156,7 @@
   }
 
   .slide-in-right {
-    animation: slideInRight 0.3s ease-out;
+    animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   @keyframes slideInRight {
@@ -164,8 +164,35 @@
     to { transform: translateX(0); opacity: 1; }
   }
 
+  .slide-in-left {
+    animation: slideInLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes slideInLeft {
+    from { transform: translateX(-100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  .slide-in-up {
+    animation: slideInUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes slideInUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .slide-in-down {
+    animation: slideInDown 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes slideInDown {
+    from { transform: translateY(-100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
   .fade-in {
-    animation: fadeIn 0.4s ease-out;
+    animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   @keyframes fadeIn {
@@ -173,17 +200,53 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
+  .fade-in-scale {
+    animation: fadeInScale 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes fadeInScale {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
   .cart-badge {
     @apply absolute -top-2 -right-2 bg-accent text-accent-foreground;
     @apply w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center;
-    animation: pop 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    animation: pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
   @keyframes pop {
     0% { transform: scale(0); }
-    70% { transform: scale(1.2); }
+    70% { transform: scale(1.15); }
     100% { transform: scale(1); }
   }
+
+  /* Smooth scale animation for buttons */
+  .scale-on-active {
+    transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .scale-on-active:active {
+    transform: scale(0.95);
+  }
+
+  /* Smooth backdrop blur transition */
+  .backdrop-blur-smooth {
+    transition: backdrop-filter 0.3s ease-out;
+  }
+
+  /* Stagger animation for lists */
+  .stagger-in > * {
+    animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  }
+
+  .stagger-in > *:nth-child(1) { animation-delay: 0ms; }
+  .stagger-in > *:nth-child(2) { animation-delay: 50ms; }
+  .stagger-in > *:nth-child(3) { animation-delay: 100ms; }
+  .stagger-in > *:nth-child(4) { animation-delay: 150ms; }
+  .stagger-in > *:nth-child(5) { animation-delay: 200ms; }
+  .stagger-in > *:nth-child(6) { animation-delay: 250ms; }
+  .stagger-in > *:nth-child(n+7) { animation-delay: 300ms; }
 
   /* Scrollbar hide utility for horizontal scrolling */
   .scrollbar-hide {
