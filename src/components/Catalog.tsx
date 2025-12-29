@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Sparkles } from 'lucide-react';
-import { Product, products } from '@/data/products';
+import { Product, getProducts, searchProducts } from '@/data/products';
 import ProductCard from './ProductCard';
 
 type Category = 'todo' | 'maquillaje' | 'joyeria' | 'perfumes' | 'accesorios';
@@ -22,6 +22,25 @@ const categories: { id: Category; label: string }[] = [
 
 const Catalog = ({ searchQuery, onAddToCart }: CatalogProps) => {
   const [activeCategory, setActiveCategory] = useState<Category>('todo');
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch products
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        const data = await getProducts();
+        setProducts(data);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const filteredProducts = useMemo(() => {
     let filtered = products;
@@ -34,14 +53,14 @@ const Catalog = ({ searchQuery, onAddToCart }: CatalogProps) => {
     // Filter by search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(p => 
+      filtered = filtered.filter(p =>
         p.name.toLowerCase().includes(query) ||
         p.category.toLowerCase().includes(query)
       );
     }
 
     return filtered;
-  }, [activeCategory, searchQuery]);
+  }, [activeCategory, searchQuery, products]);
 
   return (
     <section id="catalog" className="py-12 md:py-16">
@@ -77,7 +96,12 @@ const Catalog = ({ searchQuery, onAddToCart }: CatalogProps) => {
         </div>
 
         {/* Product Grid */}
-        {filteredProducts.length > 0 ? (
+        {loading ? (
+          <div className="text-center py-16">
+            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-accent border-r-transparent"></div>
+            <p className="text-muted-foreground mt-4">Cargando productos...</p>
+          </div>
+        ) : filteredProducts.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {filteredProducts.map((product) => (
               <ProductCard
