@@ -64,12 +64,12 @@ const Catalog = ({ searchQuery, onAddToCart }: CatalogProps) => {
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex flex-wrap justify-center gap-2 mb-10">
+        <div className="flex overflow-x-auto sm:flex-wrap sm:justify-center gap-2 mb-8 sm:mb-10 pb-2 sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide snap-x snap-mandatory">
           {categories.map((cat) => (
             <button
               key={cat.id}
               onClick={() => setActiveCategory(cat.id)}
-              className={`filter-tab ${activeCategory === cat.id ? 'active' : ''}`}
+              className={`filter-tab shrink-0 snap-start ${activeCategory === cat.id ? 'active' : ''}`}
             >
               {cat.label}
             </button>

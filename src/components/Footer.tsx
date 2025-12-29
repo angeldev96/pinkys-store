@@ -2,7 +2,7 @@ import { Instagram, Facebook, Twitter, Mail, MapPin, Phone, Heart } from 'lucide
 
 const Footer = () => {
   return (
-    <footer className="bg-foreground text-primary-foreground">
+    <footer id="contact" className="bg-foreground text-primary-foreground">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand */}
@@ -86,9 +86,14 @@ const Footer = () => {
           <p className="text-sm text-primary-foreground/60">
             © 2025 Pinky's Store. Todos los derechos reservados.
           </p>
-          <p className="text-sm text-primary-foreground/60 flex items-center gap-1">
-            Hecho con <Heart className="w-3 h-3 text-destructive fill-destructive" /> en México
-          </p>
+          <a
+            href="https://personal-porfolio-tan.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-primary-foreground/60 flex items-center gap-1 hover:text-primary-foreground/80 transition-colors"
+          >
+            Hecho con <Heart className="w-3 h-3 text-destructive fill-destructive" /> por Angel Valladares
+          </a>
         </div>
       </div>
     </footer>

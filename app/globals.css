@@ -184,4 +184,20 @@
     70% { transform: scale(1.2); }
     100% { transform: scale(1); }
   }
+
+  /* Scrollbar hide utility for horizontal scrolling */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Better touch feedback */
+  @media (hover: none) and (pointer: coarse) {
+    button, a {
+      -webkit-tap-highlight-color: transparent;
+    }
+  }
 }
