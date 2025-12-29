@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { createBrowserClient } from '@supabase/ssr'
-import { Lock, Mail } from 'lucide-react';
+import { createBrowserClient } from '@supabase/ssr';
+import { Lock, Mail, Loader2 } from 'lucide-react';
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -61,18 +61,18 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 flex items-center justify-center px-4 py-8 safe-area-top">
       <div className="max-w-md w-full">
         {/* Logo/Brand */}
-        <div className="text-center mb-8">
-          <h1 className="font-display text-4xl font-bold text-pink-600">
+        <div className="text-center mb-6 sm:mb-8">
+          <h1 className="font-display text-3xl sm:text-4xl font-bold text-pink-600">
             Pinky's Store
           </h1>
-          <p className="text-muted-foreground mt-2">Panel de Administración</p>
+          <p className="text-sm sm:text-base text-gray-600 mt-2">Panel de Administración</p>
         </div>
 
         {/* Login Card */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8">
           <div className="flex items-center justify-center mb-6">
             <div className="p-3 bg-pink-100 rounded-full">
               <Lock className="w-6 h-6 text-pink-600" />
@@ -98,10 +98,12 @@ export default function AdminLoginPage() {
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="email"
+                  inputMode="email"
+                  autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none transition"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none input-touch transition"
                   placeholder="admin@pinkysstore.com"
                 />
               </div>
@@ -115,10 +117,11 @@ export default function AdminLoginPage() {
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="password"
+                  autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none transition"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none input-touch transition"
                   placeholder="••••••••"
                 />
               </div>
@@ -127,11 +130,11 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-pink-600 hover:bg-pink-700 disabled:bg-pink-400 text-white font-medium py-3 rounded-lg transition flex items-center justify-center gap-2"
+              className="w-full bg-pink-600 hover:bg-pink-700 disabled:bg-pink-400 text-white font-medium h-12 rounded-lg transition flex items-center justify-center gap-2 touch-target"
             >
               {loading ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-white border-r-transparent rounded-full animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin" />
                   Iniciando sesión...
                 </>
               ) : (
@@ -155,7 +158,7 @@ export default function AdminLoginPage() {
           <p className="font-medium mb-1">¿Primera vez?</p>
           <p className="text-blue-700">
             Para crear una cuenta de administrador, usa la página de registro
-            que estará disponible temporalmente en <code>/admin/register</code>
+            que estará disponible temporalmente en <code className="bg-blue-100 px-1 rounded">/admin/register</code>
           </p>
         </div>
       </div>

@@ -2,11 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
+import { createBrowserClient } from '@supabase/ssr';
 import {
   Plus,
-  Edit,
-  Trash2,
   LogOut,
   Package,
   Search,
@@ -15,11 +13,9 @@ import {
   Check,
 } from 'lucide-react';
 import { productsApi, type Product as SupabaseProduct, ProductCategory, ProductBadge } from '@/lib/supabase';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { ProductList } from '@/components/admin/ProductList';
+import { FloatingActionButton } from '@/components/admin/FloatingActionButton';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const categories: { value: ProductCategory; label: string }[] = [
   { value: 'maquillaje', label: 'Maquillaje' },
@@ -69,6 +65,7 @@ const initialFormData: FormData = {
 
 export default function AdminDashboardPage() {
   const router = useRouter();
+  const { isMobile } = useIsMobile();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -85,7 +82,15 @@ export default function AdminDashboardPage() {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const { data, error } = await productsApi.getAll();
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
+
       if (error) throw error;
       setProducts(data || []);
     } catch (error: any) {
@@ -101,6 +106,10 @@ export default function AdminDashboardPage() {
   };
 
   const handleLogout = async () => {
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
     await supabase.auth.signOut();
     router.push('/admin/login');
   };
@@ -111,7 +120,10 @@ export default function AdminDashboardPage() {
     setShowModal(true);
   };
 
-  const handleEdit = (product: Product) => {
+  const handleEdit = (id: string) => {
+    const product = products.find(p => p.id === id);
+    if (!product) return;
+
     setEditingProduct(product);
     setFormData({
       name: product.name,
@@ -129,7 +141,11 @@ export default function AdminDashboardPage() {
     if (!confirm('¿Estás seguro de que quieres eliminar este producto?')) return;
 
     try {
-      const { error } = await productsApi.delete(id);
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      const { error } = await supabase.from('products').delete().eq('id', id);
       if (error) throw error;
       showNotification('success', 'Producto eliminado correctamente');
       fetchProducts();
@@ -143,22 +159,30 @@ export default function AdminDashboardPage() {
     setSaving(true);
 
     try {
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+
       const productData = {
         name: formData.name,
-        description: formData.description || undefined,
+        description: formData.description || null,
         price: parseFloat(formData.price),
         category: formData.category,
-        image_url: formData.image_url || undefined,
-        badge: formData.badge || undefined,
+        image_url: formData.image_url || null,
+        badge: formData.badge,
         stock: parseInt(formData.stock) || 0,
       };
 
       if (editingProduct) {
-        const { error } = await productsApi.update(editingProduct.id, productData);
+        const { error } = await supabase
+          .from('products')
+          .update(productData)
+          .eq('id', editingProduct.id);
         if (error) throw error;
         showNotification('success', 'Producto actualizado correctamente');
       } else {
-        const { error } = await productsApi.create(productData);
+        const { error } = await supabase.from('products').insert(productData);
         if (error) throw error;
         showNotification('success', 'Producto creado correctamente');
       }
@@ -178,64 +202,64 @@ export default function AdminDashboardPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pb-16 md:pb-0">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="font-display text-2xl font-bold text-pink-600">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-10 safe-area-top">
+        <div className="container mx-auto px-4 py-3 md:py-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="min-w-0 flex-1">
+              <h1 className="font-display text-xl md:text-2xl font-bold text-pink-600 truncate">
                 Pinky's Store
               </h1>
-              <p className="text-sm text-gray-600">Panel de Administración</p>
+              <p className="text-xs md:text-sm text-gray-600 hidden sm:block">Panel de Administración</p>
             </div>
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition"
+              className="flex items-center gap-2 px-3 py-2 md:px-4 text-gray-700 hover:bg-gray-100 rounded-lg transition touch-target"
             >
               <LogOut className="w-4 h-4" />
-              Cerrar Sesión
+              <span className="hidden sm:inline">Cerrar Sesión</span>
             </button>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-sm p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-pink-100 rounded-lg">
-                <Package className="w-6 h-6 text-pink-600" />
+      <main className="container mx-auto px-4 py-4 md:py-8 space-y-4 md:space-y-6">
+        {/* Stats - Mobile Horizontal Scroll, Desktop Grid */}
+        <div className="flex md:grid md:grid-cols-3 gap-3 md:gap-6 overflow-x-auto md:overflow-visible pb-2 md:pb-0 scroll-snap-x">
+          <div className="min-w-[200px] md:min-w-0 bg-white rounded-xl shadow-sm p-4 md:p-6 snap-x">
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="p-2 md:p-3 bg-pink-100 rounded-lg shrink-0">
+                <Package className="w-5 h-5 md:w-6 md:h-6 text-pink-600" />
               </div>
-              <div>
-                <p className="text-sm text-gray-600">Total Productos</p>
-                <p className="text-2xl font-bold text-gray-900">{products.length}</p>
+              <div className="min-w-0">
+                <p className="text-xs md:text-sm text-gray-600">Total Productos</p>
+                <p className="text-xl md:text-2xl font-bold text-gray-900">{products.length}</p>
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-xl shadow-sm p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-green-100 rounded-lg">
-                <Check className="w-6 h-6 text-green-600" />
+          <div className="min-w-[200px] md:min-w-0 bg-white rounded-xl shadow-sm p-4 md:p-6 snap-x">
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="p-2 md:p-3 bg-green-100 rounded-lg shrink-0">
+                <Check className="w-5 h-5 md:w-6 md:h-6 text-green-600" />
               </div>
-              <div>
-                <p className="text-sm text-gray-600">Total en Stock</p>
-                <p className="text-2xl font-bold text-gray-900">
+              <div className="min-w-0">
+                <p className="text-xs md:text-sm text-gray-600">Total Stock</p>
+                <p className="text-xl md:text-2xl font-bold text-gray-900">
                   {products.reduce((sum, p) => sum + p.stock, 0)}
                 </p>
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-xl shadow-sm p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-purple-100 rounded-lg">
-                <span className="text-2xl font-bold text-purple-600">L</span>
+          <div className="min-w-[200px] md:min-w-0 bg-white rounded-xl shadow-sm p-4 md:p-6 snap-x">
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="p-2 md:p-3 bg-purple-100 rounded-lg shrink-0">
+                <span className="text-xl md:text-2xl font-bold text-purple-600">L</span>
               </div>
-              <div>
-                <p className="text-sm text-gray-600">Valor Inventario</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  L{products.reduce((sum, p) => sum + p.price * p.stock, 0).toFixed(2)}
+              <div className="min-w-0">
+                <p className="text-xs md:text-sm text-gray-600">Valor Total</p>
+                <p className="text-xl md:text-2xl font-bold text-gray-900">
+                  {products.reduce((sum, p) => sum + p.price * p.stock, 0).toFixed(0)}
                 </p>
               </div>
             </div>
@@ -243,7 +267,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row gap-3">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
@@ -251,134 +275,30 @@ export default function AdminDashboardPage() {
               placeholder="Buscar productos..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none"
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none input-touch"
             />
           </div>
-          <button
-            onClick={handleCreate}
-            className="flex items-center justify-center gap-2 px-6 py-2 bg-pink-600 hover:bg-pink-700 text-white font-medium rounded-lg transition"
-          >
-            <Plus className="w-5 h-5" />
-            Nuevo Producto
-          </button>
+          {!isMobile && (
+            <button
+              onClick={handleCreate}
+              className="flex items-center justify-center gap-2 px-6 py-2.5 bg-pink-600 hover:bg-pink-700 text-white font-medium rounded-lg transition touch-target"
+            >
+              <Plus className="w-5 h-5" />
+              Nuevo Producto
+            </button>
+          )}
         </div>
 
-        {/* Products Table */}
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Producto
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Categoría
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Precio
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Stock
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Badge
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Acciones
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {loading ? (
-                  <tr>
-                    <td colSpan={6} className="px-6 py-12 text-center">
-                      <Loader2 className="w-8 h-8 animate-spin mx-auto text-pink-600" />
-                    </td>
-                  </tr>
-                ) : filteredProducts.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
-                      No se encontraron productos
-                    </td>
-                  </tr>
-                ) : (
-                  filteredProducts.map((product) => (
-                    <tr key={product.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          {product.image_url && (
-                            <img
-                              src={product.image_url}
-                              alt={product.name}
-                              className="w-12 h-12 rounded-lg object-cover"
-                            />
-                          )}
-                          <div>
-                            <p className="font-medium text-gray-900">{product.name}</p>
-                            {product.description && (
-                              <p className="text-sm text-gray-500 truncate max-w-xs">
-                                {product.description}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-full">
-                          {product.category}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 font-medium text-gray-900">
-                        L{product.price.toFixed(2)}
-                      </td>
-                      <td className="px-6 py-4">
-                        <span
-                          className={`px-2 py-1 text-xs font-medium rounded-full ${
-                            product.stock > 10
-                              ? 'bg-green-100 text-green-700'
-                              : product.stock > 0
-                              ? 'bg-yellow-100 text-yellow-700'
-                              : 'bg-red-100 text-red-700'
-                          }`}
-                        >
-                          {product.stock} unidades
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        {product.badge ? (
-                          <span className="px-2 py-1 text-xs font-medium bg-pink-100 text-pink-700 rounded-full">
-                            {product.badge}
-                          </span>
-                        ) : (
-                          <span className="text-gray-400">—</span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() => handleEdit(product)}
-                            className="p-2 text-gray-600 hover:text-pink-600 hover:bg-pink-50 rounded-lg transition"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(product.id)}
-                            className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        {/* Products - Dual View (Cards/Table) */}
+        <ProductList
+          products={filteredProducts}
+          loading={loading}
+          searchQuery={searchQuery}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
 
-        <div className="mt-6 text-center">
+        <div className="text-center pt-4">
           <a
             href="/"
             className="inline-flex items-center gap-2 text-gray-600 hover:text-pink-600 transition"
@@ -388,25 +308,28 @@ export default function AdminDashboardPage() {
         </div>
       </main>
 
-      {/* Modal */}
+      {/* Floating Action Button (Mobile Only) */}
+      <FloatingActionButton onClick={handleCreate} />
+
+      {/* Modal - Optimized for Mobile */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold">
-                  {editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
-                </h2>
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
+        <div className="fixed inset-0 bg-black/50 flex items-end md:items-center justify-center p-0 md:p-4 z-50">
+          <div className="bg-white rounded-t-2xl md:rounded-2xl shadow-xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-white p-4 md:p-6 border-b border-gray-200 flex items-center justify-between">
+              <h2 className="text-lg md:text-xl font-semibold">
+                {editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
+              </h2>
+              <button
+                onClick={() => setShowModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition touch-target"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            {/* Modal Form */}
+            <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Nombre del Producto *
@@ -416,7 +339,7 @@ export default function AdminDashboardPage() {
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none input-touch"
                 />
               </div>
 
@@ -428,11 +351,11 @@ export default function AdminDashboardPage() {
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   rows={3}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none input-touch"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Precio (L) *
@@ -443,7 +366,7 @@ export default function AdminDashboardPage() {
                     required
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none input-touch"
                   />
                 </div>
                 <div>
@@ -455,12 +378,12 @@ export default function AdminDashboardPage() {
                     required
                     value={formData.stock}
                     onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none input-touch"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Categoría *
@@ -469,7 +392,7 @@ export default function AdminDashboardPage() {
                     required
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value as ProductCategory })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none input-touch"
                   >
                     {categories.map((cat) => (
                       <option key={cat.value} value={cat.value}>
@@ -490,7 +413,7 @@ export default function AdminDashboardPage() {
                         badge: e.target.value ? (e.target.value as ProductBadge) : null,
                       })
                     }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none input-touch"
                   >
                     {badges.map((badge) => (
                       <option key={badge.label} value={badge.value || ''}>
@@ -510,34 +433,37 @@ export default function AdminDashboardPage() {
                   value={formData.image_url}
                   onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
                   placeholder="https://images.unsplash.com/..."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none input-touch"
                 />
               </div>
 
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="flex-1 px-4 py-2 bg-pink-600 hover:bg-pink-700 disabled:bg-pink-400 text-white font-medium rounded-lg transition flex items-center justify-center gap-2"
-                >
-                  {saving ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Guardando...
-                    </>
-                  ) : editingProduct ? (
-                    'Actualizar'
-                  ) : (
-                    'Crear'
-                  )}
-                </button>
+              {/* Sticky Submit Button for Mobile */}
+              <div className="sticky bottom-0 bg-white pt-4 pb-safe-bottom">
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowModal(false)}
+                    className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition touch-target"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="flex-1 px-4 py-3 bg-pink-600 hover:bg-pink-700 disabled:bg-pink-400 text-white font-medium rounded-lg transition flex items-center justify-center gap-2 touch-target"
+                  >
+                    {saving ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Guardando...
+                      </>
+                    ) : editingProduct ? (
+                      'Actualizar'
+                    ) : (
+                      'Crear'
+                    )}
+                  </button>
+                </div>
               </div>
             </form>
           </div>
@@ -547,9 +473,9 @@ export default function AdminDashboardPage() {
       {/* Notification */}
       {notification && (
         <div
-          className={`fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg ${
+          className={`fixed bottom-20 md:bottom-4 left-4 right-4 md:left-auto md:right-auto md:max-w-sm px-6 py-3 rounded-lg shadow-lg ${
             notification.type === 'success' ? 'bg-green-500' : 'bg-red-500'
-          } text-white`}
+          } text-white z-50`}
         >
           {notification.message}
         </div>
