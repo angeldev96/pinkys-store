@@ -1,9 +1,7 @@
 "use client";
 
-import { useState } from 'react';
-import { X, Plus, Minus, ShoppingBag, Trash2, MessageCircle, User, Phone, Loader2 } from 'lucide-react';
+import { X, Plus, Minus, ShoppingBag, Trash2, MessageCircle } from 'lucide-react';
 import { CartItem } from '@/data/products';
-import { ordersApi } from '@/lib/supabase';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -24,42 +22,11 @@ const CartDrawer = ({
   onRemove,
   totalPrice
 }: CartDrawerProps) => {
-  const [showOrderForm, setShowOrderForm] = useState(false);
-  const [customerName, setCustomerName] = useState('');
-  const [customerPhone, setCustomerPhone] = useState('');
-  const [sending, setSending] = useState(false);
-
   if (!isOpen) return null;
 
-  const handleWhatsAppOrder = async () => {
-    if (!customerName.trim() || !customerPhone.trim()) return;
-
-    setSending(true);
-
-    try {
-      // Save order to database
-      await ordersApi.create({
-        customer_name: customerName.trim(),
-        customer_phone: customerPhone.trim(),
-        items: items.map(item => ({
-          id: item.id,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity,
-          image_url: item.image,
-        })),
-        total: totalPrice,
-      });
-    } catch (err) {
-      // Even if save fails, proceed with WhatsApp
-      console.error('Error saving order:', err);
-    }
-
-    // Create formatted message for WhatsApp
+  const handleWhatsAppOrder = () => {
     let message = '\u{1F338} *PEDIDO PINKY\'S STORE*\n\n';
-    message += `\u{1F464} *Cliente:* ${customerName}\n`;
-    message += `\u{1F4F1} *Tel:* ${customerPhone}\n\n`;
-    message += 'Me gustaría ordenar los siguientes productos:\n\n';
+    message += 'Hola! Me gustaría ordenar los siguientes productos:\n\n';
 
     items.forEach((item, index) => {
       message += `${index + 1}. *${item.name}*\n`;
@@ -74,10 +41,6 @@ const CartDrawer = ({
     const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
 
     window.open(whatsappUrl, '_blank');
-    setSending(false);
-    setShowOrderForm(false);
-    setCustomerName('');
-    setCustomerPhone('');
   };
 
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
@@ -212,61 +175,16 @@ const CartDrawer = ({
               </div>
             </div>
 
-            {showOrderForm ? (
-              <div className="space-y-3 fade-in">
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Tu nombre"
-                    value={customerName}
-                    onChange={(e) => setCustomerName(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none text-sm"
-                  />
-                </div>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    type="tel"
-                    placeholder="Tu número de teléfono"
-                    value={customerPhone}
-                    onChange={(e) => setCustomerPhone(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none text-sm"
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setShowOrderForm(false)}
-                    className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition text-sm"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    onClick={handleWhatsAppOrder}
-                    disabled={!customerName.trim() || !customerPhone.trim() || sending}
-                    className="flex-1 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 text-white font-semibold py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 text-sm"
-                  >
-                    {sending ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <MessageCircle className="w-4 h-4" />
-                    )}
-                    Enviar Pedido
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <button
-                onClick={() => setShowOrderForm(true)}
-                className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-3 touch-target shadow-lg shadow-green-500/20 scale-on-active"
-              >
-                <MessageCircle className="w-5 h-5" />
-                Ordenar por WhatsApp
-              </button>
-            )}
+            <button
+              onClick={handleWhatsAppOrder}
+              className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-3 touch-target shadow-lg shadow-green-500/20 scale-on-active"
+            >
+              <MessageCircle className="w-5 h-5" />
+              Ordenar por WhatsApp
+            </button>
 
             <p className="text-xs text-gray-500 text-center mt-3 fade-in">
-              Te contactaremos para confirmar tu pedido
+              Serás redirigido a WhatsApp para confirmar tu pedido
             </p>
           </div>
         )}
