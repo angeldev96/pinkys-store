@@ -4,10 +4,12 @@ import { productsApi, Product as SupabaseProduct, ProductCategory, ProductBadge 
 export interface Product {
   id: string;
   name: string;
+  description?: string | null;
   price: number;
   category: ProductCategory;
   image: string;
   badge?: ProductBadge | null;
+  stock?: number;
 }
 
 export type CartItem = Product & { quantity: number };
@@ -24,10 +26,12 @@ export async function getProducts(category?: ProductCategory): Promise<Product[]
   return (data || []).map(p => ({
     id: p.id,
     name: p.name,
+    description: p.description,
     price: Number(p.price),
     category: p.category,
     image: p.image_url || 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=400&fit=crop',
     badge: p.badge,
+    stock: p.stock,
   }))
 }
 
@@ -43,10 +47,12 @@ export async function searchProducts(query: string): Promise<Product[]> {
   return (data || []).map(p => ({
     id: p.id,
     name: p.name,
+    description: p.description,
     price: Number(p.price),
     category: p.category,
     image: p.image_url || 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=400&fit=crop',
     badge: p.badge,
+    stock: p.stock,
   }))
 }
 
@@ -62,9 +68,11 @@ export async function getProduct(id: string): Promise<Product | null> {
   return {
     id: data.id,
     name: data.name,
+    description: data.description,
     price: Number(data.price),
     category: data.category,
     image: data.image_url || 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=400&fit=crop',
     badge: data.badge,
+    stock: data.stock,
   }
 }

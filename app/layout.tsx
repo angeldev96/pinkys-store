@@ -10,7 +10,25 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Pinky's Store | Cosméticos, Joyería y Perfumes Premium",
-  description: "Descubre la exclusiva colección de Pinky's Store. Cosméticos de alta calidad, joyería elegante y perfumes premium. Envío gratis en tu primera compra.",
+  description: "Descubre la exclusiva colección de Pinky's Store. Cosméticos de alta calidad, joyería elegante y perfumes premium en Honduras. Envíos a nivel nacional.",
+  keywords: ["cosméticos", "joyería", "perfumes", "maquillaje", "accesorios", "Honduras", "San Pedro Sula", "belleza", "tienda online"],
+  authors: [{ name: "Pinky's Store" }],
+  openGraph: {
+    title: "Pinky's Store | Cosméticos, Joyería y Perfumes Premium",
+    description: "Tu destino para cosméticos premium, joyería elegante y fragancias exclusivas en Honduras.",
+    type: "website",
+    locale: "es_HN",
+    siteName: "Pinky's Store",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Pinky's Store | Cosméticos, Joyería y Perfumes Premium",
+    description: "Tu destino para cosméticos premium, joyería elegante y fragancias exclusivas en Honduras.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export const viewport: Viewport = {

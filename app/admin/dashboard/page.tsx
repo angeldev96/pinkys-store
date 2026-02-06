@@ -11,10 +11,14 @@ import {
   Loader2,
   X,
   Check,
+  ShoppingBag,
+  ClipboardList,
 } from 'lucide-react';
 import { productsApi, type Product as SupabaseProduct, ProductCategory, ProductBadge } from '@/lib/supabase';
 import { ProductList } from '@/components/admin/ProductList';
 import { FloatingActionButton } from '@/components/admin/FloatingActionButton';
+import { ImageUpload } from '@/components/admin/ImageUpload';
+import { OrdersList } from '@/components/admin/OrdersList';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const categories: { value: ProductCategory; label: string }[] = [
@@ -74,6 +78,7 @@ export default function AdminDashboardPage() {
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [saving, setSaving] = useState(false);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [activeTab, setActiveTab] = useState<'products' | 'orders'>('products');
 
   useEffect(() => {
     fetchProducts();
@@ -259,44 +264,76 @@ export default function AdminDashboardPage() {
               <div className="min-w-0">
                 <p className="text-xs md:text-sm text-gray-600">Valor Total</p>
                 <p className="text-xl md:text-2xl font-bold text-gray-900">
-                  {products.reduce((sum, p) => sum + p.price * p.stock, 0).toFixed(0)}
+                  L{products.reduce((sum, p) => sum + p.price * p.stock, 0).toLocaleString('es-HN', { minimumFractionDigits: 0 })}
                 </p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Buscar productos..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none input-touch"
-            />
-          </div>
-          {!isMobile && (
-            <button
-              onClick={handleCreate}
-              className="flex items-center justify-center gap-2 px-6 py-2.5 bg-pink-600 hover:bg-pink-700 text-white font-medium rounded-lg transition touch-target"
-            >
-              <Plus className="w-5 h-5" />
-              Nuevo Producto
-            </button>
-          )}
+        {/* Tabs */}
+        <div className="flex gap-1 bg-gray-100 p-1 rounded-lg">
+          <button
+            onClick={() => setActiveTab('products')}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-md text-sm font-medium transition ${
+              activeTab === 'products'
+                ? 'bg-white text-pink-600 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            <ShoppingBag className="w-4 h-4" />
+            Productos
+          </button>
+          <button
+            onClick={() => setActiveTab('orders')}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-md text-sm font-medium transition ${
+              activeTab === 'orders'
+                ? 'bg-white text-pink-600 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            <ClipboardList className="w-4 h-4" />
+            Pedidos
+          </button>
         </div>
 
-        {/* Products - Dual View (Cards/Table) */}
-        <ProductList
-          products={filteredProducts}
-          loading={loading}
-          searchQuery={searchQuery}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
+        {activeTab === 'products' ? (
+          <>
+            {/* Actions */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Buscar productos..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none input-touch"
+                />
+              </div>
+              {!isMobile && (
+                <button
+                  onClick={handleCreate}
+                  className="flex items-center justify-center gap-2 px-6 py-2.5 bg-pink-600 hover:bg-pink-700 text-white font-medium rounded-lg transition touch-target"
+                >
+                  <Plus className="w-5 h-5" />
+                  Nuevo Producto
+                </button>
+              )}
+            </div>
+
+            {/* Products - Dual View (Cards/Table) */}
+            <ProductList
+              products={filteredProducts}
+              loading={loading}
+              searchQuery={searchQuery}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          </>
+        ) : (
+          <OrdersList />
+        )}
 
         <div className="text-center pt-4">
           <a
@@ -308,8 +345,8 @@ export default function AdminDashboardPage() {
         </div>
       </main>
 
-      {/* Floating Action Button (Mobile Only) */}
-      <FloatingActionButton onClick={handleCreate} />
+      {/* Floating Action Button (Mobile Only - Products Tab) */}
+      {activeTab === 'products' && <FloatingActionButton onClick={handleCreate} />}
 
       {/* Modal - Optimized for Mobile */}
       {showModal && (
@@ -424,18 +461,11 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  URL de Imagen
-                </label>
-                <input
-                  type="url"
-                  value={formData.image_url}
-                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                  placeholder="https://images.unsplash.com/..."
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none input-touch"
-                />
-              </div>
+              <ImageUpload
+                value={formData.image_url}
+                onChange={(url) => setFormData({ ...formData, image_url: url })}
+                onUploading={(isUploading) => setSaving(isUploading)}
+              />
 
               {/* Sticky Submit Button for Mobile */}
               <div className="sticky bottom-0 bg-white pt-4 pb-safe-bottom">

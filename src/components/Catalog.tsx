@@ -111,9 +111,23 @@ const Catalog = ({ searchQuery, onAddToCart }: CatalogProps) => {
 
         {/* Product Grid */}
         {loading ? (
-          <div className="text-center py-16">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-accent border-r-transparent"></div>
-            <p className="text-muted-foreground mt-4">Cargando productos...</p>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden animate-pulse">
+                <div className="aspect-square bg-gray-200" />
+                <div className="p-3 sm:p-4 space-y-3">
+                  <div className="h-3 bg-gray-200 rounded w-16" />
+                  <div className="space-y-2">
+                    <div className="h-4 bg-gray-200 rounded w-full" />
+                    <div className="h-4 bg-gray-200 rounded w-2/3" />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="h-6 bg-gray-200 rounded w-20" />
+                    <div className="h-10 w-10 bg-gray-200 rounded-lg" />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         ) : filteredProducts.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 stagger-in">

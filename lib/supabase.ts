@@ -42,6 +42,74 @@ export interface UpdateProductInput {
   stock?: number
 }
 
+export type OrderStatus = 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled'
+
+export interface OrderItem {
+  id: string
+  name: string
+  price: number
+  quantity: number
+  image_url?: string
+}
+
+export interface Order {
+  id: string
+  customer_name: string
+  customer_phone: string
+  items: OrderItem[]
+  total: number
+  status: OrderStatus
+  notes: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface CreateOrderInput {
+  customer_name: string
+  customer_phone: string
+  items: OrderItem[]
+  total: number
+  notes?: string
+}
+
+// Storage helpers
+export const storageApi = {
+  async uploadProductImage(file: File): Promise<{ url: string | null; error: string | null }> {
+    const fileExt = file.name.split('.').pop()
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
+    const filePath = `products/${fileName}`
+
+    const { error } = await supabase.storage
+      .from('product-images')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false,
+      })
+
+    if (error) {
+      return { url: null, error: error.message }
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('product-images')
+      .getPublicUrl(filePath)
+
+    return { url: publicUrl, error: null }
+  },
+
+  async deleteProductImage(url: string): Promise<{ error: string | null }> {
+    // Extract file path from public URL
+    const path = url.split('/product-images/')[1]
+    if (!path) return { error: 'Invalid URL' }
+
+    const { error } = await supabase.storage
+      .from('product-images')
+      .remove([path])
+
+    return { error: error?.message || null }
+  },
+}
+
 // Products API
 export const productsApi = {
   // Get all products
@@ -107,6 +175,43 @@ export const productsApi = {
       .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
       .order('name', { ascending: true })
 
+    return { data, error }
+  },
+}
+
+// Orders API
+export const ordersApi = {
+  async getAll(status?: OrderStatus) {
+    let query = supabase.from('orders').select('*').order('created_at', { ascending: false })
+    if (status) {
+      query = query.eq('status', status)
+    }
+    const { data, error } = await query
+    return { data, error }
+  },
+
+  async create(input: CreateOrderInput) {
+    const { data, error } = await supabase
+      .from('orders')
+      .insert({
+        customer_name: input.customer_name,
+        customer_phone: input.customer_phone,
+        items: input.items,
+        total: input.total,
+        notes: input.notes || null,
+      })
+      .select()
+      .single()
+    return { data, error }
+  },
+
+  async updateStatus(id: string, status: OrderStatus) {
+    const { data, error } = await supabase
+      .from('orders')
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+      .single()
     return { data, error }
   },
 }

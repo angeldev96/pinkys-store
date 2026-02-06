@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
 import { Lock, Mail, Loader2 } from 'lucide-react';
@@ -30,31 +30,23 @@ export default function AdminLoginPage() {
 
       if (error) throw error;
 
-      console.log('Login successful, user:', data.user);
-
       // Check if user is admin
-      const { data: profile, error: profileError } = await supabase
+      const { data: profile } = await supabase
         .from('user_profiles')
         .select('role')
         .eq('id', data.user.id)
         .single();
 
-      console.log('Profile data:', profile, 'Error:', profileError);
-
       if (!profile || profile.role !== 'admin') {
-        console.log('Not admin or no profile');
         await supabase.auth.signOut();
         setError('No tienes permisos de administrador');
         setLoading(false);
         return;
       }
 
-      console.log('Is admin, redirecting to dashboard...');
-
       // Use window.location for hard redirect to ensure cookies are set
       window.location.href = '/admin/dashboard';
     } catch (err: any) {
-      console.error('Login error:', err);
       setError(err.message || 'Error al iniciar sesión');
       setLoading(false);
     }

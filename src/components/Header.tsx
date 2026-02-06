@@ -30,7 +30,7 @@ const categories = [
 const Header = ({ cartCount, onCartClick, searchQuery, onSearchChange }: HeaderProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const isMobile = useIsMobile();
+  const { isMobile } = useIsMobile();
 
   const handleCategoryClick = (categoryId: string) => {
     setIsMobileMenuOpen(false);
@@ -176,9 +176,13 @@ const Header = ({ cartCount, onCartClick, searchQuery, onSearchChange }: HeaderP
 
           {/* Actions */}
           <div className="flex items-center gap-1 sm:gap-2">
-            <button className="p-2.5 rounded-full hover:bg-secondary transition-colors">
+            <a
+              href="/admin/login"
+              className="p-2.5 rounded-full hover:bg-secondary transition-colors"
+              aria-label="Acceso administrador"
+            >
               <User className="w-5 h-5 text-foreground" />
-            </button>
+            </a>
             <button
               onClick={onCartClick}
               className="relative p-2.5 rounded-full hover:bg-secondary transition-colors"

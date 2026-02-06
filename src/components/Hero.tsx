@@ -23,7 +23,7 @@ const Hero = () => {
           {/* Badge */}
           <div className="inline-flex items-center gap-1.5 sm:gap-2 bg-secondary/80 backdrop-blur-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-full mb-4 sm:mb-6">
             <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-accent sparkle" />
-            <span className="text-xs sm:text-sm font-medium text-secondary-foreground">Nueva Colección 2025</span>
+            <span className="text-xs sm:text-sm font-medium text-secondary-foreground">Nueva Colección 2026</span>
           </div>
 
           {/* Heading */}
@@ -47,7 +47,10 @@ const Hero = () => {
               Ver Ofertas
               <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform" />
             </button>
-            <button className="btn-secondary text-sm sm:text-base">
+            <button
+              onClick={scrollToCatalog}
+              className="btn-secondary text-sm sm:text-base"
+            >
               Nueva Colección
             </button>
           </div>

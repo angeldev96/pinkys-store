@@ -1,4 +1,4 @@
-import { X, Plus, ShoppingBag } from 'lucide-react';
+import { X, Plus, Check } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Product } from '@/data/products';
 
@@ -9,13 +9,21 @@ interface ProductDetailDrawerProps {
   onAddToCart: (product: Product) => void;
 }
 
+const badgeStyles: Record<string, string> = {
+  'Nuevo': 'bg-blue-500 text-white',
+  'Oferta': 'bg-orange-500 text-white',
+  'Bestseller': 'bg-green-500 text-white',
+  'Premium': 'bg-purple-500 text-white',
+};
+
 export function ProductDetailDrawer({ isOpen, onClose, product, onAddToCart }: ProductDetailDrawerProps) {
   const { isMobile } = useIsMobile();
 
   if (!isOpen || !product) return null;
 
-  // On desktop, don't show the drawer (products are visible in grid)
   if (!isMobile) return null;
+
+  const inStock = (product.stock ?? 0) > 0;
 
   return (
     <>
@@ -36,25 +44,50 @@ export function ProductDetailDrawer({ isOpen, onClose, product, onAddToCart }: P
         </button>
 
         {/* Product Image - Full width */}
-        <div className="flex-1 bg-gray-50 flex items-center justify-center p-8 fade-in">
+        <div className="relative flex-1 bg-gray-50 flex items-center justify-center p-8 fade-in">
           <img
             src={product.image}
             alt={product.name}
             className="max-w-full max-h-full object-contain fade-in-scale"
           />
+          {/* Badge */}
+          {product.badge && (
+            <span className={`absolute top-4 left-4 px-3 py-1 text-sm font-bold rounded-full shadow-md ${badgeStyles[product.badge] || 'bg-gray-500 text-white'}`}>
+              {product.badge}
+            </span>
+          )}
         </div>
 
         {/* Product Info - Bottom sheet */}
         <div className="bg-white rounded-t-3xl shadow-2xl p-6 pb-safe-bottom -mt-6 relative z-10 slide-in-up">
-          {/* Category */}
-          <span className="text-xs uppercase tracking-wider text-gray-500 font-medium fade-in">
-            {product.category}
-          </span>
+          {/* Category & Stock */}
+          <div className="flex items-center justify-between">
+            <span className="text-xs uppercase tracking-wider text-gray-500 font-medium fade-in">
+              {product.category}
+            </span>
+            {inStock ? (
+              <span className="flex items-center gap-1 text-xs text-green-600 font-medium fade-in">
+                <Check className="w-3 h-3" />
+                En stock
+              </span>
+            ) : (
+              <span className="text-xs text-red-500 font-medium fade-in">
+                Agotado
+              </span>
+            )}
+          </div>
 
           {/* Name */}
           <h2 className="font-display text-2xl font-bold text-gray-900 mt-2 fade-in">
             {product.name}
           </h2>
+
+          {/* Description */}
+          {product.description && (
+            <p className="text-sm text-gray-600 mt-2 leading-relaxed fade-in">
+              {product.description}
+            </p>
+          )}
 
           {/* Price */}
           <div className="mt-4 flex items-center justify-between">
@@ -68,17 +101,13 @@ export function ProductDetailDrawer({ isOpen, onClose, product, onAddToCart }: P
                 onAddToCart(product);
                 onClose();
               }}
-              className="bg-pink-600 hover:bg-pink-700 text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 touch-target shadow-lg shadow-pink-600/20 scale-on-active"
+              disabled={!inStock}
+              className="bg-pink-600 hover:bg-pink-700 disabled:bg-gray-300 text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 touch-target shadow-lg shadow-pink-600/20 scale-on-active transition-all"
             >
               <Plus className="w-5 h-5" />
-              Agregar
+              {inStock ? 'Agregar' : 'Agotado'}
             </button>
           </div>
-
-          {/* Description hint */}
-          <p className="text-sm text-gray-500 mt-4 text-center fade-in">
-            Desliza hacia abajo para cerrar
-          </p>
         </div>
       </div>
     </>

@@ -48,18 +48,18 @@ const Footer = () => {
             <h4 className="font-display font-semibold text-lg mb-4">Enlaces</h4>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="text-primary-foreground/70 hover:text-primary-foreground text-sm transition-colors">
+                <a href="#hero" className="text-primary-foreground/70 hover:text-primary-foreground text-sm transition-colors">
                   Inicio
                 </a>
               </li>
               <li>
-                <a href="#productos" className="text-primary-foreground/70 hover:text-primary-foreground text-sm transition-colors">
+                <a href="#catalog" className="text-primary-foreground/70 hover:text-primary-foreground text-sm transition-colors">
                   Productos
                 </a>
               </li>
               <li>
-                <a href="#ofertas" className="text-primary-foreground/70 hover:text-primary-foreground text-sm transition-colors">
-                  Ofertas
+                <a href="#catalog" className="text-primary-foreground/70 hover:text-primary-foreground text-sm transition-colors">
+                  Catálogo
                 </a>
               </li>
             </ul>
@@ -124,7 +124,7 @@ const Footer = () => {
         {/* Bottom */}
         <div className="border-t border-primary-foreground/10 mt-10 pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-primary-foreground/60">
-            © 2025 Pinky's Store. Todos los derechos reservados.
+            © {new Date().getFullYear()} Pinky's Store. Todos los derechos reservados.
           </p>
           <a
             href="https://personal-porfolio-tan.vercel.app/"

@@ -7,12 +7,21 @@ interface ProductCardProps {
   onView?: (product: Product) => void;
 }
 
+const badgeStyles: Record<string, string> = {
+  'Nuevo': 'bg-blue-500 text-white',
+  'Oferta': 'bg-orange-500 text-white',
+  'Bestseller': 'bg-green-500 text-white',
+  'Premium': 'bg-purple-500 text-white',
+};
+
 const ProductCard = ({ product, onAddToCart, onView }: ProductCardProps) => {
   const handleCardClick = () => {
     if (onView) {
       onView(product);
     }
   };
+
+  const inStock = (product.stock ?? 0) > 0;
 
   return (
     <article
@@ -24,9 +33,23 @@ const ProductCard = ({ product, onAddToCart, onView }: ProductCardProps) => {
         <img
           src={product.image}
           alt={product.name}
-          className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+          className={`w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105 ${!inStock ? 'opacity-60 grayscale-[30%]' : ''}`}
           loading="lazy"
         />
+        {/* Badge */}
+        {product.badge && (
+          <span className={`absolute top-2 left-2 px-2 py-0.5 text-[10px] sm:text-xs font-bold rounded-full shadow-sm ${badgeStyles[product.badge] || 'bg-gray-500 text-white'}`}>
+            {product.badge}
+          </span>
+        )}
+        {/* Out of Stock Overlay */}
+        {!inStock && (
+          <div className="absolute bottom-2 left-2 right-2">
+            <span className="block text-center bg-red-500/90 text-white text-[10px] sm:text-xs font-bold py-1 rounded-md">
+              Agotado
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Content */}
@@ -49,9 +72,15 @@ const ProductCard = ({ product, onAddToCart, onView }: ProductCardProps) => {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              onAddToCart(product);
+              if (inStock) onAddToCart(product);
             }}
-            className="bg-pink-600 hover:bg-pink-700 text-white p-2 rounded-lg transition-all duration-200 scale-on-active shrink-0 shadow-md hover:shadow-lg"
+            disabled={!inStock}
+            className={`p-2 rounded-lg transition-all duration-200 scale-on-active shrink-0 shadow-md ${
+              inStock
+                ? 'bg-pink-600 hover:bg-pink-700 text-white hover:shadow-lg'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed shadow-none'
+            }`}
+            aria-label={inStock ? `Agregar ${product.name} al carrito` : `${product.name} agotado`}
           >
             <Plus className="w-5 h-5" />
           </button>
