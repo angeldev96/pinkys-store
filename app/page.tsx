@@ -14,6 +14,7 @@ import { Product } from '@/data/products';
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastKey, setToastKey] = useState(0);
   const {
     cartItems,
     addToCart,
@@ -29,8 +30,7 @@ export default function Home() {
   const handleAddToCart = useCallback((product: Product) => {
     addToCart(product);
     setToastMessage(`${product.name} agregado al carrito`);
-    // Force new reference so useEffect fires even for same product
-    setTimeout(() => setToastMessage(null), 2100);
+    setToastKey(k => k + 1);
   }, [addToCart]);
 
   return (
@@ -62,7 +62,7 @@ export default function Home() {
       />
 
       <WhatsAppButton />
-      <CartToast message={toastMessage} />
+      <CartToast key={toastKey} message={toastMessage} />
     </div>
   );
 }
