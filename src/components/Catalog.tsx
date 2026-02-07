@@ -7,6 +7,7 @@ import ProductCard from './ProductCard';
 import { ProductDetailDrawer } from './ProductDetailDrawer';
 
 type Category = 'todo' | 'maquillaje' | 'joyeria' | 'perfumes' | 'accesorios';
+type Gender = 'todo' | 'unisex' | 'caballero' | 'dama';
 
 interface CatalogProps {
   searchQuery: string;
@@ -21,8 +22,16 @@ const categories: { id: Category; label: string }[] = [
   { id: 'accesorios', label: 'Accesorios' },
 ];
 
+const genders: { id: Gender; label: string }[] = [
+  { id: 'todo', label: 'Todos' },
+  { id: 'dama', label: 'Dama' },
+  { id: 'caballero', label: 'Caballero' },
+  { id: 'unisex', label: 'Unisex' },
+];
+
 const Catalog = ({ searchQuery, onAddToCart }: CatalogProps) => {
   const [activeCategory, setActiveCategory] = useState<Category>('todo');
+  const [activeGender, setActiveGender] = useState<Gender>('todo');
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -53,6 +62,11 @@ const Catalog = ({ searchQuery, onAddToCart }: CatalogProps) => {
       filtered = filtered.filter(p => p.category === activeCategory);
     }
 
+    // Filter by gender
+    if (activeGender !== 'todo') {
+      filtered = filtered.filter(p => p.genero === activeGender);
+    }
+
     // Filter by search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
@@ -63,7 +77,7 @@ const Catalog = ({ searchQuery, onAddToCart }: CatalogProps) => {
     }
 
     return filtered;
-  }, [activeCategory, searchQuery, products]);
+  }, [activeCategory, activeGender, searchQuery, products]);
 
   const handleViewProduct = (product: Product) => {
     setSelectedProduct(product);
@@ -96,8 +110,8 @@ const Catalog = ({ searchQuery, onAddToCart }: CatalogProps) => {
           </p>
         </div>
 
-        {/* Filter Tabs */}
-        <div className="flex overflow-x-auto sm:flex-wrap sm:justify-center gap-2 mb-8 sm:mb-10 pb-2 sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide snap-x snap-mandatory">
+        {/* Category Filter Tabs */}
+        <div className="flex overflow-x-auto sm:flex-wrap sm:justify-center gap-2 mb-3 sm:mb-4 pb-2 sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide snap-x snap-mandatory">
           {categories.map((cat) => (
             <button
               key={cat.id}
@@ -105,6 +119,19 @@ const Catalog = ({ searchQuery, onAddToCart }: CatalogProps) => {
               className={`filter-tab shrink-0 snap-start ${activeCategory === cat.id ? 'active' : ''}`}
             >
               {cat.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Gender Filter Tabs */}
+        <div className="flex overflow-x-auto sm:flex-wrap sm:justify-center gap-2 mb-8 sm:mb-10 pb-2 sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide snap-x snap-mandatory">
+          {genders.map((g) => (
+            <button
+              key={g.id}
+              onClick={() => setActiveGender(g.id)}
+              className={`filter-tab shrink-0 snap-start ${activeGender === g.id ? 'active' : ''}`}
+            >
+              {g.label}
             </button>
           ))}
         </div>
@@ -146,7 +173,7 @@ const Catalog = ({ searchQuery, onAddToCart }: CatalogProps) => {
               No se encontraron productos
             </p>
             <button
-              onClick={() => setActiveCategory('todo')}
+              onClick={() => { setActiveCategory('todo'); setActiveGender('todo'); }}
               className="btn-secondary mt-4"
             >
               Ver todos los productos

@@ -7,6 +7,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // Database types
 export type ProductCategory = 'maquillaje' | 'joyeria' | 'perfumes' | 'accesorios'
+export type ProductGender = 'unisex' | 'caballero' | 'dama'
 export type ProductBadge = 'Nuevo' | 'Oferta' | 'Bestseller' | 'Premium'
 
 export interface Product {
@@ -15,6 +16,7 @@ export interface Product {
   description: string | null
   price: number
   category: ProductCategory
+  genero: ProductGender
   image_url: string | null
   badge: ProductBadge | null
   stock: number
@@ -27,6 +29,7 @@ export interface CreateProductInput {
   description?: string
   price: number
   category: ProductCategory
+  genero?: ProductGender
   image_url?: string
   badge?: ProductBadge
   stock?: number
@@ -37,6 +40,7 @@ export interface UpdateProductInput {
   description?: string
   price?: number
   category?: ProductCategory
+  genero?: ProductGender
   image_url?: string
   badge?: ProductBadge
   stock?: number
@@ -139,6 +143,7 @@ export const productsApi = {
         description: input.description || null,
         price: input.price,
         category: input.category,
+        genero: input.genero || 'unisex',
         image_url: input.image_url || null,
         badge: input.badge || null,
         stock: input.stock ?? 0,

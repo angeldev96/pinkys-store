@@ -14,7 +14,7 @@ import {
   ShoppingBag,
   ClipboardList,
 } from 'lucide-react';
-import { productsApi, type Product as SupabaseProduct, ProductCategory, ProductBadge } from '@/lib/supabase';
+import { productsApi, type Product as SupabaseProduct, ProductCategory, ProductGender, ProductBadge } from '@/lib/supabase';
 import { ProductList } from '@/components/admin/ProductList';
 import { FloatingActionButton } from '@/components/admin/FloatingActionButton';
 import { ImageUpload } from '@/components/admin/ImageUpload';
@@ -26,6 +26,12 @@ const categories: { value: ProductCategory; label: string }[] = [
   { value: 'joyeria', label: 'Joyería' },
   { value: 'perfumes', label: 'Perfumes' },
   { value: 'accesorios', label: 'Accesorios' },
+];
+
+const generos: { value: ProductGender; label: string }[] = [
+  { value: 'unisex', label: 'Unisex' },
+  { value: 'caballero', label: 'Caballero' },
+  { value: 'dama', label: 'Dama' },
 ];
 
 const badges: { value: ProductBadge | null; label: string }[] = [
@@ -42,6 +48,7 @@ interface Product {
   description: string | null;
   price: number;
   category: ProductCategory;
+  genero: ProductGender;
   image_url: string | null;
   badge: ProductBadge | null;
   stock: number;
@@ -52,6 +59,7 @@ interface FormData {
   description: string;
   price: string;
   category: ProductCategory;
+  genero: ProductGender;
   image_url: string;
   badge: ProductBadge | null;
   stock: string;
@@ -62,6 +70,7 @@ const initialFormData: FormData = {
   description: '',
   price: '',
   category: 'maquillaje',
+  genero: 'unisex',
   image_url: '',
   badge: null,
   stock: '0',
@@ -135,6 +144,7 @@ export default function AdminDashboardPage() {
       description: product.description || '',
       price: product.price.toString(),
       category: product.category,
+      genero: product.genero || 'unisex',
       image_url: product.image_url || '',
       badge: product.badge,
       stock: product.stock.toString(),
@@ -174,6 +184,7 @@ export default function AdminDashboardPage() {
         description: formData.description || null,
         price: parseFloat(formData.price),
         category: formData.category,
+        genero: formData.genero,
         image_url: formData.image_url || null,
         badge: formData.badge,
         stock: parseInt(formData.stock) || 0,
@@ -420,7 +431,7 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Categoría *
@@ -434,6 +445,23 @@ export default function AdminDashboardPage() {
                     {categories.map((cat) => (
                       <option key={cat.value} value={cat.value}>
                         {cat.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Género *
+                  </label>
+                  <select
+                    required
+                    value={formData.genero}
+                    onChange={(e) => setFormData({ ...formData, genero: e.target.value as ProductGender })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none input-touch"
+                  >
+                    {generos.map((g) => (
+                      <option key={g.value} value={g.value}>
+                        {g.label}
                       </option>
                     ))}
                   </select>

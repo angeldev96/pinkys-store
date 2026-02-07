@@ -63,7 +63,7 @@ export function ProductDetailDrawer({ isOpen, onClose, product, onAddToCart }: P
           {/* Category & Stock */}
           <div className="flex items-center justify-between">
             <span className="text-xs uppercase tracking-wider text-gray-500 font-medium fade-in">
-              {product.category}
+              {product.category} · {product.genero}
             </span>
             {inStock ? (
               <span className="flex items-center gap-1 text-xs text-green-600 font-medium fade-in">

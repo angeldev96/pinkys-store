@@ -1,5 +1,5 @@
 import { Edit, Trash2 } from 'lucide-react';
-import { ProductCategory, ProductBadge } from '@/lib/supabase';
+import { ProductCategory, ProductGender, ProductBadge } from '@/lib/supabase';
 
 interface ProductCardProps {
   id: string;
@@ -7,6 +7,7 @@ interface ProductCardProps {
   description: string | null;
   price: number;
   category: ProductCategory;
+  genero: ProductGender;
   image_url: string | null;
   badge: ProductBadge | null;
   stock: number;
@@ -19,6 +20,12 @@ const categoryLabels: Record<ProductCategory, string> = {
   joyeria: 'Joyería',
   perfumes: 'Perfumes',
   accesorios: 'Accesorios',
+};
+
+const generoLabels: Record<ProductGender, string> = {
+  unisex: 'Unisex',
+  caballero: 'Caballero',
+  dama: 'Dama',
 };
 
 const badgeColors: Record<ProductBadge, string> = {
@@ -34,6 +41,7 @@ export function ProductCard({
   description,
   price,
   category,
+  genero,
   image_url,
   badge,
   stock,
@@ -92,6 +100,9 @@ export function ProductCard({
             </span>
             <span className="px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">
               {categoryLabels[category]}
+            </span>
+            <span className="px-2 py-0.5 text-xs font-medium bg-pink-50 text-pink-600 rounded-full">
+              {generoLabels[genero] || 'Unisex'}
             </span>
           </div>
 

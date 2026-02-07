@@ -118,7 +118,7 @@ const CartDrawer = ({
                         {item.name}
                       </h3>
                       <p className="text-xs text-gray-500 capitalize mt-0.5">
-                        {item.category}
+                        {item.category} · {item.genero}
                       </p>
                       <p className="font-bold text-pink-600 text-base mt-1">
                         L{item.price.toFixed(2)}

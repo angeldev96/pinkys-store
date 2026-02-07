@@ -1,6 +1,6 @@
 import { ProductCard } from './ProductCard';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { ProductCategory, ProductBadge } from '@/lib/supabase';
+import { ProductCategory, ProductGender, ProductBadge } from '@/lib/supabase';
 import { Edit, Trash2, Search, Loader2 } from 'lucide-react';
 
 interface Product {
@@ -9,6 +9,7 @@ interface Product {
   description: string | null;
   price: number;
   category: ProductCategory;
+  genero: ProductGender;
   image_url: string | null;
   badge: ProductBadge | null;
   stock: number;
@@ -27,6 +28,12 @@ const categoryLabels: Record<ProductCategory, string> = {
   joyeria: 'Joyería',
   perfumes: 'Perfumes',
   accesorios: 'Accesorios',
+};
+
+const generoLabels: Record<ProductGender, string> = {
+  unisex: 'Unisex',
+  caballero: 'Caballero',
+  dama: 'Dama',
 };
 
 const badgeColors: Record<ProductBadge, string> = {
@@ -100,6 +107,9 @@ export function ProductList({ products, loading, searchQuery, onEdit, onDelete }
                   Categoría
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Género
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Precio
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -138,6 +148,11 @@ export function ProductList({ products, loading, searchQuery, onEdit, onDelete }
                   <td className="px-6 py-4">
                     <span className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-full">
                       {categoryLabels[product.category]}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="px-2 py-1 text-xs font-medium bg-pink-50 text-pink-700 rounded-full">
+                      {generoLabels[product.genero] || 'Unisex'}
                     </span>
                   </td>
                   <td className="px-6 py-4 font-medium text-gray-900">

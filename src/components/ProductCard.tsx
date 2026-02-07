@@ -54,9 +54,9 @@ const ProductCard = ({ product, onAddToCart, onView }: ProductCardProps) => {
 
       {/* Content */}
       <div className="p-3 sm:p-4">
-        {/* Category */}
+        {/* Category & Gender */}
         <span className="text-[10px] sm:text-xs uppercase tracking-wider text-gray-500 font-medium">
-          {product.category}
+          {product.category} · {product.genero}
         </span>
 
         {/* Name */}
