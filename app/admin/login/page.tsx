@@ -145,14 +145,7 @@ export default function AdminLoginPage() {
           </div>
         </div>
 
-        {/* Setup Info */}
-        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
-          <p className="font-medium mb-1">¿Primera vez?</p>
-          <p className="text-blue-700">
-            Para crear una cuenta de administrador, usa la página de registro
-            que estará disponible temporalmente en <code className="bg-blue-100 px-1 rounded">/admin/register</code>
-          </p>
-        </div>
+  
       </div>
     </div>
   );

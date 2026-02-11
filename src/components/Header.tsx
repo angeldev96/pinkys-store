@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { Search, ShoppingBag, User, Menu, Home, Package, Mail, Sparkles, Gem, Droplets, Brush } from 'lucide-react';
 import {
   Sheet,
@@ -119,14 +120,17 @@ const Header = ({ cartCount, onCartClick, searchQuery, onSearchChange }: HeaderP
               </Sheet>
             )}
 
-            <img
+            <Image
               src="/pinkys-logo.jpg"
-              alt="Pinky's Store"
+              alt="Pinky's Store - Tienda de maquillaje y joyería en Honduras"
+              width={48}
+              height={48}
               className="h-10 sm:h-12 w-10 sm:w-12 object-cover rounded-full border-2 border-primary/20"
+              priority
             />
             <div className="hidden sm:block">
-              <h1 className="font-display text-xl font-bold text-primary">Pinky's</h1>
-              <span className="text-xs text-muted-foreground tracking-widest uppercase">Store</span>
+              <span className="font-display text-xl font-bold text-primary">Pinky's</span>
+              <span className="text-xs text-muted-foreground tracking-widest uppercase block">Store</span>
             </div>
           </div>
 
@@ -136,10 +140,11 @@ const Header = ({ cartCount, onCartClick, searchQuery, onSearchChange }: HeaderP
               <div className="relative group">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                 <input
-                  type="text"
+                  type="search"
                   placeholder="Buscar productos..."
                   value={searchQuery}
                   onChange={(e) => onSearchChange(e.target.value)}
+                  aria-label="Buscar productos en Pinky's Store"
                   className="w-full pl-10 pr-4 py-2.5 bg-secondary/50 border border-border rounded-full text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
                 />
               </div>
@@ -154,11 +159,12 @@ const Header = ({ cartCount, onCartClick, searchQuery, onSearchChange }: HeaderP
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <input
                       autoFocus
-                      type="text"
+                      type="search"
                       placeholder="Buscar productos..."
                       value={searchQuery}
                       onChange={(e) => onSearchChange(e.target.value)}
                       onBlur={() => !searchQuery && setIsSearchOpen(false)}
+                      aria-label="Buscar productos en Pinky's Store"
                       className="w-full pl-10 pr-4 py-2.5 bg-card border border-border rounded-full text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary shadow-lg"
                     />
                   </div>
@@ -167,6 +173,7 @@ const Header = ({ cartCount, onCartClick, searchQuery, onSearchChange }: HeaderP
                 <button
                   onClick={() => setIsSearchOpen(true)}
                   className="p-2.5 rounded-full hover:bg-secondary transition-colors"
+                  aria-label="Abrir buscador de productos"
                 >
                   <Search className="w-5 h-5 text-foreground" />
                 </button>
@@ -186,6 +193,7 @@ const Header = ({ cartCount, onCartClick, searchQuery, onSearchChange }: HeaderP
             <button
               onClick={onCartClick}
               className="relative p-2.5 rounded-full hover:bg-secondary transition-colors"
+              aria-label={`Carrito de compras${cartCount > 0 ? ` (${cartCount} productos)` : ''}`}
             >
               <ShoppingBag className="w-5 h-5 text-foreground" />
               {cartCount > 0 && (

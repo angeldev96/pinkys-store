@@ -1,0 +1,23 @@
+{
+  "name": "Pinky's Store - Cosméticos, Joyería y Perfumes en Honduras",
+  "short_name": "Pinky's Store",
+  "description": "Tienda en línea de cosméticos, joyería y perfumes premium en San Pedro Sula, Honduras. Envíos a nivel nacional.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fcf4f7",
+  "theme_color": "#581a2f",
+  "lang": "es-HN",
+  "categories": ["shopping", "beauty", "fashion"],
+  "icons": [
+    {
+      "src": "/pinkys-logo.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "/pinkys-logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}

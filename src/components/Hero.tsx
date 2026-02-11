@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { Sparkles, ArrowRight } from 'lucide-react';
 
 const Hero = () => {
@@ -9,10 +10,13 @@ const Hero = () => {
     <section id="hero" className="relative overflow-hidden">
       {/* Background Image with Overlay */}
       <div className="absolute inset-0">
-        <img
+        <Image
           src="/hero-banner.jpg"
-          alt="Cosméticos premium"
-          className="w-full h-full object-cover"
+          alt="Pinky's Store - Tienda de maquillaje, joyería y perfumes premium en San Pedro Sula, Honduras"
+          fill
+          className="object-cover"
+          priority
+          sizes="100vw"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-background/90 via-background/80 to-background/60 md:bg-gradient-to-r md:from-background/95 md:via-background/70 md:to-background/40" />
       </div>
@@ -26,16 +30,16 @@ const Hero = () => {
             <span className="text-xs sm:text-sm font-medium text-secondary-foreground">Nueva Colección 2026</span>
           </div>
 
-          {/* Heading */}
-          <h2 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-3 sm:mb-4">
-            Resalta tu{' '}
-            <span className="text-primary">belleza</span>{' '}
-            única
-          </h2>
+          {/* Heading - H1 for SEO: primary page heading */}
+          <h1 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-3 sm:mb-4">
+            Maquillaje, Joyería y Perfumes{' '}
+            <span className="text-primary">Premium</span>{' '}
+            en Honduras
+          </h1>
 
           {/* Subheading */}
           <p className="text-sm sm:text-base md:text-lg text-muted-foreground mb-6 sm:mb-8 leading-relaxed">
-            Descubre nuestra exclusiva selección de cosméticos, joyería y perfumes para realzar tu estilo personal.
+            Descubre la colección exclusiva de Pinky's Store. Cosméticos de alta calidad, joyería elegante y fragancias con envío a todo Honduras.
           </p>
 
           {/* CTAs */}

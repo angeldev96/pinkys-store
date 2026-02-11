@@ -10,24 +10,27 @@ const Footer = () => {
             <div className="flex items-center gap-3 mb-4">
               <img
                 src="/pinkys-logo.jpg"
-                alt="Pinky's Store"
+                alt="Logo de Pinky's Store - Tienda de cosméticos y joyería en Honduras"
                 className="w-12 h-12 rounded-full object-cover"
+                width={48}
+                height={48}
               />
               <div>
                 <h3 className="font-display text-xl font-bold">Pinky's Store</h3>
               </div>
             </div>
             <p className="text-primary-foreground/70 text-sm leading-relaxed mb-4">
-              Tu destino para cosméticos premium, joyería elegante y fragancias exclusivas.
+              Tu tienda de maquillaje, joyería y perfumes premium en San Pedro Sula, Honduras. Productos de alta calidad para resaltar tu belleza.
             </p>
-            <p className="text-primary-foreground/70 text-sm leading-relaxed">
-              Envíos a nivel nacional 🇭🇳
-            </p>
+            <address className="text-primary-foreground/70 text-sm leading-relaxed not-italic">
+              San Pedro Sula, Honduras. Envíos a nivel nacional.
+            </address>
             <div className="flex gap-3 mt-4">
               <a
                 href="https://www.instagram.com/pinkysstore2/"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Seguir a Pinky's Store en Instagram"
                 className="p-2 bg-primary-foreground/10 rounded-full hover:bg-primary-foreground/20 transition-colors"
               >
                 <Instagram className="w-4 h-4" />
@@ -36,6 +39,7 @@ const Footer = () => {
                 href="https://www.facebook.com/people/Pinkyys-Store/61567252978469/"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Seguir a Pinky's Store en Facebook"
                 className="p-2 bg-primary-foreground/10 rounded-full hover:bg-primary-foreground/20 transition-colors"
               >
                 <Facebook className="w-4 h-4" />

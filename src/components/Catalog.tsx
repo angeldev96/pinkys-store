@@ -103,10 +103,10 @@ const Catalog = ({ searchQuery, onAddToCart }: CatalogProps) => {
             <Sparkles className="w-5 h-5 text-accent sparkle" />
           </div>
           <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground">
-            Nuestros Productos
+            Catálogo de Maquillaje, Joyería y Perfumes
           </h2>
           <p className="text-muted-foreground mt-2 max-w-md mx-auto">
-            Explora nuestra colección curada de productos premium para tu belleza
+            Explora nuestra colección de cosméticos, accesorios y fragancias premium con envío a toda Honduras
           </p>
         </div>
 
