@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { Home, ShoppingBag } from 'lucide-react';
 
 export default function NotFound() {
@@ -12,13 +13,13 @@ export default function NotFound() {
         <p className="text-gray-500 mb-8">
           Lo sentimos, la página que buscas no existe o fue movida.
         </p>
-        <a
+        <Link
           href="/"
           className="inline-flex items-center gap-2 bg-pink-600 hover:bg-pink-700 text-white px-6 py-3 rounded-full font-medium transition-all shadow-lg hover:shadow-xl"
         >
           <Home className="w-4 h-4" />
           Volver al Inicio
-        </a>
+        </Link>
       </div>
     </div>
   );

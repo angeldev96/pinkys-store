@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { Check } from 'lucide-react';
 
 interface CartToastProps {
@@ -9,32 +9,22 @@ interface CartToastProps {
 }
 
 export function CartToast({ message }: CartToastProps) {
-  const [visible, setVisible] = useState(false);
-  const [displayMessage, setDisplayMessage] = useState('');
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [visible, setVisible] = useState(!!message);
+  const [prevMessage, setPrevMessage] = useState(message);
+
+  if (message !== prevMessage) {
+    setPrevMessage(message);
+    setVisible(!!message);
+  }
 
   useEffect(() => {
-    if (message) {
-      // Clear any existing timer
-      if (timerRef.current) clearTimeout(timerRef.current);
+    if (!message) return;
 
-      setDisplayMessage(message);
-      setVisible(true);
-
-      timerRef.current = setTimeout(() => {
-        setVisible(false);
-        timerRef.current = null;
-      }, 2000);
-    } else {
-      setVisible(false);
-    }
-
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
+    const timer = setTimeout(() => setVisible(false), 2000);
+    return () => clearTimeout(timer);
   }, [message]);
 
-  if (!visible) return null;
+  if (!visible || !message) return null;
 
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] fade-in pointer-events-none">
@@ -42,7 +32,7 @@ export function CartToast({ message }: CartToastProps) {
         <div className="p-1 bg-green-500 rounded-full">
           <Check className="w-3 h-3" />
         </div>
-        <span className="text-sm font-medium whitespace-nowrap">{displayMessage}</span>
+        <span className="text-sm font-medium whitespace-nowrap">{message}</span>
       </div>
     </div>
   );

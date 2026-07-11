@@ -129,7 +129,7 @@ const Header = ({ cartCount, onCartClick, searchQuery, onSearchChange }: HeaderP
               priority
             />
             <div className="hidden sm:block">
-              <span className="font-display text-xl font-bold text-primary">Pinky's</span>
+              <span className="font-display text-xl font-bold text-primary">Pinky&apos;s</span>
               <span className="text-xs text-muted-foreground tracking-widest uppercase block">Store</span>
             </div>
           </div>

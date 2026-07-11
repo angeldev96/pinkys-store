@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { createBrowserClient } from '@supabase/ssr';
 import {
   Plus,
@@ -89,12 +90,12 @@ export default function AdminDashboardPage() {
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [activeTab, setActiveTab] = useState<'products' | 'orders'>('products');
 
-  useEffect(() => {
-    fetchProducts();
+  const showNotification = useCallback((type: 'success' | 'error', message: string) => {
+    setNotification({ type, message });
+    setTimeout(() => setNotification(null), 3000);
   }, []);
 
-  const fetchProducts = async () => {
-    setLoading(true);
+  const fetchProducts = useCallback(async () => {
     try {
       const supabase = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -107,17 +108,18 @@ export default function AdminDashboardPage() {
 
       if (error) throw error;
       setProducts(data || []);
-    } catch (error: any) {
-      showNotification('error', error.message);
+    } catch (error) {
+      showNotification('error', error instanceof Error ? error.message : 'Error al cargar productos');
     } finally {
       setLoading(false);
     }
-  };
+  }, [showNotification]);
 
-  const showNotification = (type: 'success' | 'error', message: string) => {
-    setNotification({ type, message });
-    setTimeout(() => setNotification(null), 3000);
-  };
+  useEffect(() => {
+    // fetch-on-mount: state updates happen after await, not synchronously
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchProducts();
+  }, [fetchProducts]);
 
   const handleLogout = async () => {
     const supabase = createBrowserClient(
@@ -218,14 +220,14 @@ export default function AdminDashboardPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-16 md:pb-0">
+    <div className="min-h-screen bg-gray-50 pb-24 md:pb-0">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-10 safe-area-top">
-        <div className="container mx-auto px-4 py-3 md:py-4">
+        <div className="w-full max-w-6xl mx-auto px-4 py-3 md:py-4">
           <div className="flex items-center justify-between gap-4">
             <div className="min-w-0 flex-1">
               <h1 className="font-display text-xl md:text-2xl font-bold text-pink-600 truncate">
-                Pinky's Store
+                Pinky&apos;s Store
               </h1>
               <p className="text-xs md:text-sm text-gray-600 hidden sm:block">Panel de Administración</p>
             </div>
@@ -240,7 +242,7 @@ export default function AdminDashboardPage() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-4 md:py-8 space-y-4 md:space-y-6">
+      <main className="w-full max-w-6xl mx-auto px-4 py-4 md:py-8 space-y-4 md:space-y-6">
         {/* Stats - Mobile Horizontal Scroll, Desktop Grid */}
         <div className="flex md:grid md:grid-cols-3 gap-3 md:gap-6 overflow-x-auto md:overflow-visible pb-2 md:pb-0 scroll-snap-x">
           <div className="min-w-[200px] md:min-w-0 bg-white rounded-xl shadow-sm p-4 md:p-6 snap-x">
@@ -347,12 +349,12 @@ export default function AdminDashboardPage() {
         )}
 
         <div className="text-center pt-4">
-          <a
+          <Link
             href="/"
             className="inline-flex items-center gap-2 text-gray-600 hover:text-pink-600 transition"
           >
             ← Volver a la tienda
-          </a>
+          </Link>
         </div>
       </main>
 
