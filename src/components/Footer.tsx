@@ -16,7 +16,7 @@ const Footer = () => {
                 height={48}
               />
               <div>
-                <h3 className="font-display text-xl font-bold">Pinky's Store</h3>
+                <h3 className="font-display text-xl font-bold">Pinky&apos;s Store</h3>
               </div>
             </div>
             <p className="text-primary-foreground/70 text-sm leading-relaxed mb-4">
@@ -128,7 +128,7 @@ const Footer = () => {
         {/* Bottom */}
         <div className="border-t border-primary-foreground/10 mt-10 pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-primary-foreground/60">
-            © {new Date().getFullYear()} Pinky's Store. Todos los derechos reservados.
+            © {new Date().getFullYear()} Pinky&apos;s Store. Todos los derechos reservados.
           </p>
           <a
             href="https://personal-porfolio-tan.vercel.app/"

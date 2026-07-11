@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { createBrowserClient } from '@supabase/ssr';
 import { Lock, Mail, User, Loader2, Check } from 'lucide-react';
 
@@ -25,13 +26,14 @@ export default function AdminRegisterPage() {
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
       );
 
-      const { data, error } = await supabase.auth.signUp({
+      // El rol admin NO se asigna desde el cliente: se otorga manualmente
+      // en Supabase (user_profiles) para que nadie pueda autoproclamarse admin
+      const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
             full_name: fullName,
-            role: 'admin',
           },
         },
       });
@@ -42,8 +44,8 @@ export default function AdminRegisterPage() {
       setTimeout(() => {
         router.push('/admin/login');
       }, 2000);
-    } catch (err: any) {
-      setError(err.message || 'Error al registrarse');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al registrarse');
     } finally {
       setLoading(false);
     }
@@ -73,7 +75,7 @@ export default function AdminRegisterPage() {
         {/* Logo/Brand */}
         <div className="text-center mb-6 sm:mb-8">
           <h1 className="font-display text-3xl sm:text-4xl font-bold text-pink-600">
-            Pinky's Store
+            Pinky&apos;s Store
           </h1>
           <p className="text-sm sm:text-base text-gray-600 mt-2">Registro de Administrador</p>
         </div>
@@ -172,18 +174,18 @@ export default function AdminRegisterPage() {
           </form>
 
           <div className="mt-6 text-center space-y-2">
-            <a
+            <Link
               href="/admin/login"
               className="block text-sm text-gray-600 hover:text-pink-600 transition"
             >
               ← Ir al login
-            </a>
-            <a
+            </Link>
+            <Link
               href="/"
               className="block text-sm text-gray-600 hover:text-pink-600 transition"
             >
               ← Volver a la tienda
-            </a>
+            </Link>
           </div>
         </div>
       </div>

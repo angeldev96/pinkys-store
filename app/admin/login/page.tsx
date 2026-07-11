@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { createBrowserClient } from '@supabase/ssr';
 import { Lock, Mail, Loader2 } from 'lucide-react';
 
@@ -58,7 +59,7 @@ export default function AdminLoginPage() {
         {/* Logo/Brand */}
         <div className="text-center mb-6 sm:mb-8">
           <h1 className="font-display text-3xl sm:text-4xl font-bold text-pink-600">
-            Pinky's Store
+            Pinky&apos;s Store
           </h1>
           <p className="text-sm sm:text-base text-gray-600 mt-2">Panel de Administración</p>
         </div>
@@ -136,12 +137,12 @@ export default function AdminLoginPage() {
           </form>
 
           <div className="mt-6 text-center">
-            <a
+            <Link
               href="/"
               className="text-sm text-gray-600 hover:text-pink-600 transition"
             >
               ← Volver a la tienda
-            </a>
+            </Link>
           </div>
         </div>
 

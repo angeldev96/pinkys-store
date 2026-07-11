@@ -39,7 +39,7 @@ const Hero = () => {
 
           {/* Subheading */}
           <p className="text-sm sm:text-base md:text-lg text-muted-foreground mb-6 sm:mb-8 leading-relaxed">
-            Descubre la colección exclusiva de Pinky's Store. Cosméticos de alta calidad, joyería elegante y fragancias con envío a todo Honduras.
+            Descubre la colección exclusiva de Pinky&apos;s Store. Cosméticos de alta calidad, joyería elegante y fragancias con envío a todo Honduras.
           </p>
 
           {/* CTAs */}

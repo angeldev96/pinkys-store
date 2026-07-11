@@ -26,3 +26,9 @@ dist-ssr
 supabase/.temp/*
 .mcp.json
 .env
+
+# Claude Code local session files
+.claude/
+.playwright-cli/
+*.tsbuildinfo
+reg-result.yaml
