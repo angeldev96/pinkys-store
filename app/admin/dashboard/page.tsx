@@ -363,25 +363,32 @@ export default function AdminDashboardPage() {
 
       {/* Modal - Optimized for Mobile */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-end md:items-center justify-center p-0 md:p-4 z-50">
-          <div className="bg-white rounded-t-2xl md:rounded-2xl shadow-xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-4 z-50">
+          <div className="bg-white rounded-t-2xl md:rounded-2xl shadow-2xl w-full md:max-w-2xl max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
-            <div className="sticky top-0 bg-white p-4 md:p-6 border-b border-gray-200 flex items-center justify-between">
-              <h2 className="text-lg md:text-xl font-semibold">
-                {editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
-              </h2>
+            <div className="sticky top-0 z-10 bg-white/95 backdrop-blur px-4 py-4 md:px-8 md:py-5 border-b border-gray-100 flex items-center justify-between">
+              <div>
+                <h2 className="text-lg md:text-xl font-semibold text-gray-900">
+                  {editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
+                </h2>
+                <p className="hidden md:block text-sm text-gray-500 mt-0.5">
+                  {editingProduct
+                    ? 'Actualiza los datos del producto'
+                    : 'Completa los datos para agregarlo al catálogo'}
+                </p>
+              </div>
               <button
                 onClick={() => setShowModal(false)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition touch-target"
+                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition touch-target"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Modal Form */}
-            <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-4">
+            <form onSubmit={handleSubmit} className="p-4 md:p-8 space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-600 mb-1.5">
                   Nombre del Producto *
                 </label>
                 <input
@@ -389,25 +396,25 @@ export default function AdminDashboardPage() {
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none input-touch"
+                  className="w-full px-4 py-3 md:py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pink-500/50 focus:border-pink-400 focus:bg-white outline-none transition-colors input-touch"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-600 mb-1.5">
                   Descripción
                 </label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   rows={3}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none input-touch"
+                  className="w-full px-4 py-3 md:py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pink-500/50 focus:border-pink-400 focus:bg-white outline-none transition-colors input-touch"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-600 mb-1.5">
                     Precio (L) *
                   </label>
                   <input
@@ -416,11 +423,11 @@ export default function AdminDashboardPage() {
                     required
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none input-touch"
+                    className="w-full px-4 py-3 md:py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pink-500/50 focus:border-pink-400 focus:bg-white outline-none transition-colors input-touch"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-600 mb-1.5">
                     Stock *
                   </label>
                   <input
@@ -428,21 +435,21 @@ export default function AdminDashboardPage() {
                     required
                     value={formData.stock}
                     onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none input-touch"
+                    className="w-full px-4 py-3 md:py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pink-500/50 focus:border-pink-400 focus:bg-white outline-none transition-colors input-touch"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-600 mb-1.5">
                     Categoría *
                   </label>
                   <select
                     required
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value as ProductCategory })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none input-touch"
+                    className="w-full px-4 py-3 md:py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pink-500/50 focus:border-pink-400 focus:bg-white outline-none transition-colors input-touch"
                   >
                     {categories.map((cat) => (
                       <option key={cat.value} value={cat.value}>
@@ -452,14 +459,14 @@ export default function AdminDashboardPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-600 mb-1.5">
                     Género *
                   </label>
                   <select
                     required
                     value={formData.genero}
                     onChange={(e) => setFormData({ ...formData, genero: e.target.value as ProductGender })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none input-touch"
+                    className="w-full px-4 py-3 md:py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pink-500/50 focus:border-pink-400 focus:bg-white outline-none transition-colors input-touch"
                   >
                     {generos.map((g) => (
                       <option key={g.value} value={g.value}>
@@ -469,7 +476,7 @@ export default function AdminDashboardPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-600 mb-1.5">
                     Badge
                   </label>
                   <select
@@ -480,7 +487,7 @@ export default function AdminDashboardPage() {
                         badge: e.target.value ? (e.target.value as ProductBadge) : null,
                       })
                     }
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none input-touch"
+                    className="w-full px-4 py-3 md:py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pink-500/50 focus:border-pink-400 focus:bg-white outline-none transition-colors input-touch"
                   >
                     {badges.map((badge) => (
                       <option key={badge.label} value={badge.value || ''}>
@@ -498,19 +505,19 @@ export default function AdminDashboardPage() {
               />
 
               {/* Sticky Submit Button for Mobile */}
-              <div className="sticky bottom-0 bg-white pt-4 pb-safe-bottom">
-                <div className="flex gap-3">
+              <div className="sticky bottom-0 bg-white pt-4 pb-safe-bottom border-t border-gray-100">
+                <div className="flex gap-3 md:justify-end">
                   <button
                     type="button"
                     onClick={() => setShowModal(false)}
-                    className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition touch-target"
+                    className="flex-1 md:flex-none md:px-6 px-4 py-3 md:py-2.5 border border-gray-200 text-gray-600 font-medium rounded-xl hover:bg-gray-50 hover:text-gray-900 transition touch-target"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
                     disabled={saving}
-                    className="flex-1 px-4 py-3 bg-pink-600 hover:bg-pink-700 disabled:bg-pink-400 text-white font-medium rounded-lg transition flex items-center justify-center gap-2 touch-target"
+                    className="flex-1 md:flex-none md:px-8 px-4 py-3 md:py-2.5 bg-pink-600 hover:bg-pink-700 disabled:bg-pink-400 text-white font-medium rounded-xl shadow-sm shadow-pink-600/30 transition flex items-center justify-center gap-2 touch-target"
                   >
                     {saving ? (
                       <>
