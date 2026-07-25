@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { GoogleGenAI, ApiError, FinishReason } from '@google/genai'
+import { GoogleGenAI, ApiError, FinishReason, ThinkingLevel, type GenerateContentConfig } from '@google/genai'
 import { createClient } from '@/lib/supabase-server'
 
 // Vision analysis can take a few seconds; keep the route on the Node runtime.
 export const runtime = 'nodejs'
 export const maxDuration = 60
 
-const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash'
+// Measured against real catalog photos: the flash-lite tier reads brand and
+// shade off the packaging as accurately as the models 5x its price, and stays
+// inside the "don't invent anything" rule that the bigger flash models broke.
+const MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite'
 
 const CATEGORIES = ['maquillaje', 'joyeria', 'perfumes', 'accesorios'] as const
 const GENEROS = ['unisex', 'caballero', 'dama'] as const
@@ -143,28 +146,38 @@ export async function POST(request: NextRequest) {
 
   const ai = new GoogleGenAI({ apiKey })
 
-  try {
-    const response = await ai.models.generateContent({
-      model: MODEL,
-      contents: [
-        {
-          role: 'user',
-          parts: [
-            { inlineData: { mimeType: payload.mediaType, data: payload.data } },
-            { text: 'Genera la ficha de este producto para el catálogo de la tienda.' },
-          ],
-        },
+  const contents = [
+    {
+      role: 'user',
+      parts: [
+        { inlineData: { mimeType: payload.mediaType, data: payload.data } },
+        { text: 'Genera la ficha de este producto para el catálogo de la tienda.' },
       ],
-      config: {
-        systemInstruction: SYSTEM_PROMPT,
-        responseMimeType: 'application/json',
-        responseJsonSchema: OUTPUT_SCHEMA,
-        maxOutputTokens: 1024,
-        // Describing one product photo doesn't need reasoning; 0 keeps the
-        // form responsive. Raise it if descriptions come out too shallow.
-        thinkingConfig: { thinkingBudget: 0 },
-      },
-    })
+    },
+  ]
+
+  const baseConfig: GenerateContentConfig = {
+    systemInstruction: SYSTEM_PROMPT,
+    responseMimeType: 'application/json',
+    responseJsonSchema: OUTPUT_SCHEMA,
+    maxOutputTokens: 1024,
+  }
+
+  try {
+    let response
+    try {
+      response = await ai.models.generateContent({
+        model: MODEL,
+        contents,
+        // Reading one product photo needs no reasoning, and the low level
+        // measured 0 thinking tokens. Gemini 2.x models reject thinkingLevel
+        // (they use thinkingBudget), so a GEMINI_MODEL override falls back below.
+        config: { ...baseConfig, thinkingConfig: { thinkingLevel: ThinkingLevel.LOW } },
+      })
+    } catch (error) {
+      if (!(error instanceof ApiError) || error.status !== 400) throw error
+      response = await ai.models.generateContent({ model: MODEL, contents, config: baseConfig })
+    }
 
     const finishReason = response.candidates?.[0]?.finishReason
     if (finishReason === FinishReason.SAFETY || finishReason === FinishReason.PROHIBITED_CONTENT) {
