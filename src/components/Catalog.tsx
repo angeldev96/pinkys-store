@@ -111,12 +111,12 @@ const Catalog = ({ searchQuery, onAddToCart }: CatalogProps) => {
         </div>
 
         {/* Category Filter Tabs */}
-        <div className="flex overflow-x-auto sm:flex-wrap sm:justify-center gap-2 mb-3 sm:mb-4 pb-2 sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide snap-x snap-mandatory">
+        <div className="flex flex-wrap justify-center gap-2 mb-2.5 sm:mb-4">
           {categories.map((cat) => (
             <button
               key={cat.id}
               onClick={() => setActiveCategory(cat.id)}
-              className={`filter-tab shrink-0 snap-start ${activeCategory === cat.id ? 'active' : ''}`}
+              className={`filter-tab ${activeCategory === cat.id ? 'active' : ''}`}
             >
               {cat.label}
             </button>
@@ -124,12 +124,12 @@ const Catalog = ({ searchQuery, onAddToCart }: CatalogProps) => {
         </div>
 
         {/* Gender Filter Tabs */}
-        <div className="flex overflow-x-auto sm:flex-wrap sm:justify-center gap-2 mb-8 sm:mb-10 pb-2 sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide snap-x snap-mandatory">
+        <div className="flex flex-wrap justify-center gap-2 mb-8 sm:mb-10">
           {genders.map((g) => (
             <button
               key={g.id}
               onClick={() => setActiveGender(g.id)}
-              className={`filter-tab shrink-0 snap-start ${activeGender === g.id ? 'active' : ''}`}
+              className={`filter-tab ${activeGender === g.id ? 'active' : ''}`}
             >
               {g.label}
             </button>
