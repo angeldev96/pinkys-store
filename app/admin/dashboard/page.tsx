@@ -21,6 +21,7 @@ import { FloatingActionButton } from '@/components/admin/FloatingActionButton';
 import { ImageUpload } from '@/components/admin/ImageUpload';
 import { OrdersList } from '@/components/admin/OrdersList';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { fileToImagePayload } from '@/lib/imagePayload';
 
 const categories: { value: ProductCategory; label: string }[] = [
   { value: 'maquillaje', label: 'Maquillaje' },
@@ -89,6 +90,7 @@ export default function AdminDashboardPage() {
   const [saving, setSaving] = useState(false);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [activeTab, setActiveTab] = useState<'products' | 'orders'>('products');
+  const [analyzing, setAnalyzing] = useState(false);
 
   const showNotification = useCallback((type: 'success' | 'error', message: string) => {
     setNotification({ type, message });
@@ -170,6 +172,53 @@ export default function AdminDashboardPage() {
       showNotification('error', error.message);
     }
   };
+
+  // Sends the captured photo to the vision model and fills the empty fields of
+  // the form. Never overwrites what the user (or the edited product) already has.
+  const handleAiAnalyze = useCallback(async (file: File) => {
+    setAnalyzing(true);
+    const isNewProduct = editingProduct === null;
+
+    try {
+      const payload = await fileToImagePayload(file);
+
+      const res = await fetch('/api/ai/analyze-product', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        showNotification('error', result.error || 'No se pudo analizar la imagen');
+        return;
+      }
+
+      if (!result.detected) {
+        showNotification('error', result.notes || 'No se reconoció el producto en la foto');
+        return;
+      }
+
+      setFormData((prev) => ({
+        ...prev,
+        name: prev.name.trim() ? prev.name : result.name,
+        description: prev.description.trim() ? prev.description : result.description,
+        category: isNewProduct ? result.category : prev.category,
+        genero: isNewProduct ? result.genero : prev.genero,
+        badge: isNewProduct && !prev.badge ? result.badge : prev.badge,
+      }));
+
+      showNotification('success', 'Ficha completada con IA, revisa y pon el precio');
+    } catch (error) {
+      showNotification(
+        'error',
+        error instanceof Error ? error.message : 'No se pudo analizar la imagen'
+      );
+    } finally {
+      setAnalyzing(false);
+    }
+  }, [editingProduct, showNotification]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -387,6 +436,14 @@ export default function AdminDashboardPage() {
 
             {/* Modal Form */}
             <form onSubmit={handleSubmit} className="p-4 md:p-8 space-y-5">
+              <ImageUpload
+                value={formData.image_url}
+                onChange={(url) => setFormData({ ...formData, image_url: url })}
+                onUploading={(isUploading) => setSaving(isUploading)}
+                onFilePicked={handleAiAnalyze}
+                analyzing={analyzing}
+              />
+
               <div>
                 <label className="block text-sm font-medium text-gray-600 mb-1.5">
                   Nombre del Producto *
@@ -497,12 +554,6 @@ export default function AdminDashboardPage() {
                   </select>
                 </div>
               </div>
-
-              <ImageUpload
-                value={formData.image_url}
-                onChange={(url) => setFormData({ ...formData, image_url: url })}
-                onUploading={(isUploading) => setSaving(isUploading)}
-              />
 
               {/* Sticky Submit Button for Mobile */}
               <div className="sticky bottom-0 bg-white pt-4 pb-safe-bottom border-t border-gray-100">
