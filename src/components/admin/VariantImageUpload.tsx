@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from 'react';
-import { ImagePlus, Loader2, X } from 'lucide-react';
+import { ImagePlus, Loader2, RefreshCw, X } from 'lucide-react';
 import { useImageUpload } from '@/hooks/useImageUpload';
 
 interface VariantImageUploadProps {
@@ -11,10 +11,14 @@ interface VariantImageUploadProps {
   label?: string;
 }
 
-/** Miniatura cuadrada: la foto del tono, que también es su swatch en la tienda. */
+/**
+ * Foto del tono: es su swatch en la tienda y la imagen que se muestra al
+ * elegirlo. Con foto cargada, tocar la miniatura la reemplaza.
+ */
 export function VariantImageUpload({ value, onChange, label }: VariantImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const { upload, uploading, error } = useImageUpload();
+  const toneName = label?.trim() || 'este tono';
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -26,16 +30,29 @@ export function VariantImageUpload({ value, onChange, label }: VariantImageUploa
   };
 
   return (
-    <div className="shrink-0">
-      <div className="relative w-14 h-14 rounded-xl overflow-hidden border border-gray-200 bg-white group">
+    <div className="shrink-0 w-20">
+      <div className="relative w-20 h-20 rounded-xl overflow-hidden group">
         {value ? (
           <>
-            <img src={value} alt={label || 'Tono'} className="w-full h-full object-cover" />
+            <button
+              type="button"
+              onClick={() => inputRef.current?.click()}
+              disabled={uploading}
+              title="Cambiar foto"
+              aria-label={`Cambiar la foto de ${toneName}`}
+              className="w-full h-full border border-gray-200 rounded-xl overflow-hidden bg-white"
+            >
+              <img src={value} alt={label || 'Tono'} className="w-full h-full object-cover" />
+              <span className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1 bg-black/55 text-white text-[10px] font-medium py-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <RefreshCw className="w-3 h-3" />
+                Cambiar
+              </span>
+            </button>
             <button
               type="button"
               onClick={() => onChange(null)}
               title="Quitar foto"
-              className="absolute top-0.5 right-0.5 p-0.5 bg-red-500 text-white rounded-full shadow opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
+              className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full shadow opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
             >
               <X className="w-3 h-3" />
             </button>
@@ -45,13 +62,16 @@ export function VariantImageUpload({ value, onChange, label }: VariantImageUploa
             type="button"
             onClick={() => inputRef.current?.click()}
             disabled={uploading}
-            aria-label={`Subir foto del tono ${label || ''}`.trim()}
-            className="w-full h-full flex items-center justify-center bg-gray-50 hover:bg-pink-50 hover:text-pink-600 text-gray-400 transition-colors"
+            aria-label={`Subir la foto de ${toneName}`}
+            className="w-full h-full flex flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-pink-300 bg-white text-pink-600 hover:bg-pink-50 transition-colors disabled:opacity-60"
           >
             {uploading ? (
-              <Loader2 className="w-5 h-5 animate-spin text-pink-500" />
+              <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
-              <ImagePlus className="w-5 h-5" />
+              <>
+                <ImagePlus className="w-5 h-5" />
+                <span className="text-[10px] font-semibold leading-none">Foto</span>
+              </>
             )}
           </button>
         )}
@@ -63,15 +83,7 @@ export function VariantImageUpload({ value, onChange, label }: VariantImageUploa
         )}
       </div>
 
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/jpeg,image/png,image/webp,image/gif"
-        onChange={handleFileChange}
-        className="hidden"
-      />
-
-      {error && <p className="text-[10px] text-red-600 mt-1 max-w-14">{error}</p>}
+      {error && <p className="text-[10px] text-red-600 mt-1">{error}</p>}
     </div>
   );
 }

@@ -38,7 +38,7 @@ export function VariantsEditor({ value, onChange }: VariantsEditorProps) {
           <div>
             <p className="text-sm font-semibold text-gray-900">Tonos</p>
             <p className="text-xs text-gray-500">
-              Para el mismo producto en varias tonalidades. Dejalo vacío si no aplica.
+              Mismo producto en varias tonalidades. Cada tono lleva su foto. Dejalo vacío si no aplica.
             </p>
           </div>
         </div>
@@ -52,8 +52,16 @@ export function VariantsEditor({ value, onChange }: VariantsEditorProps) {
 
       {enabled && (
         <div className="mt-4 space-y-3">
+          <div className="flex gap-3 px-1 text-[11px] font-medium uppercase tracking-wider text-gray-400">
+            <span className="w-20 shrink-0">Foto</span>
+            <span>Nombre y stock del tono</span>
+          </div>
+
           {variants.map((variant) => (
-            <div key={variant.id} className="flex items-start gap-3">
+            <div
+              key={variant.id}
+              className="flex items-start gap-3 bg-white border border-gray-200 rounded-xl p-2"
+            >
               <VariantImageUpload
                 value={variant.image_url}
                 onChange={(url) => updateVariant(variant.id, { image_url: url })}
