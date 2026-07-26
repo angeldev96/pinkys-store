@@ -110,8 +110,8 @@ const CartDrawer = ({
                     {/* Image */}
                     <div className="w-20 h-20 rounded-lg overflow-hidden shrink-0 bg-gray-100">
                       <img
-                        src={item.image}
-                        alt={item.name}
+                        src={item.variant?.image_url || item.image}
+                        alt={item.variant ? `${item.name} - ${item.variant.name}` : item.name}
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -126,10 +126,13 @@ const CartDrawer = ({
                       </p>
                       {item.variant && (
                         <span className="inline-flex items-center gap-1.5 mt-1 pl-1 pr-2 py-0.5 bg-gray-100 rounded-full text-xs text-gray-700">
-                          <span
-                            className="w-3 h-3 rounded-full ring-1 ring-black/10"
-                            style={{ backgroundColor: item.variant.hex || '#e5e7eb' }}
-                          />
+                          {item.variant.image_url && (
+                            <img
+                              src={item.variant.image_url}
+                              alt=""
+                              className="w-4 h-4 rounded-full object-cover ring-1 ring-black/10"
+                            />
+                          )}
                           {item.variant.name}
                         </span>
                       )}

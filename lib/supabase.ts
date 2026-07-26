@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { ProductVariant, parseVariants, variantsTotalStock } from './variants'
+import { parseImageUrls } from './images'
 
 export type { ProductVariant }
 
@@ -25,6 +26,8 @@ export interface Product {
   stock: number
   /** Tonos del producto. Vacío = producto sin tonos. */
   variants: ProductVariant[]
+  /** Fotos extra, aparte de image_url y de la foto de cada tono. */
+  images: string[]
   created_at: string
   updated_at: string
 }
@@ -39,6 +42,7 @@ export interface CreateProductInput {
   badge?: ProductBadge
   stock?: number
   variants?: ProductVariant[]
+  images?: string[]
 }
 
 export interface UpdateProductInput {
@@ -51,6 +55,7 @@ export interface UpdateProductInput {
   badge?: ProductBadge
   stock?: number
   variants?: ProductVariant[]
+  images?: string[]
 }
 
 /**
@@ -169,6 +174,7 @@ export const productsApi = {
         badge: input.badge || null,
         stock: normalized.stock ?? 0,
         variants: normalized.variants,
+        images: parseImageUrls(input.images),
       })
       .select()
       .single()
@@ -183,6 +189,9 @@ export const productsApi = {
     const patch: Record<string, unknown> = { ...input }
     if (input.variants !== undefined) {
       Object.assign(patch, withVariantStock(input))
+    }
+    if (input.images !== undefined) {
+      patch.images = parseImageUrls(input.images)
     }
 
     const { data, error } = await supabase

@@ -2,23 +2,22 @@
 
 import { Palette, Plus, Trash2 } from 'lucide-react';
 import { ProductVariant, makeVariantId, variantsTotalStock } from '@/lib/variants';
+import { VariantImageUpload } from './VariantImageUpload';
 
 interface VariantsEditorProps {
   value: ProductVariant[];
   onChange: (variants: ProductVariant[]) => void;
 }
 
-const DEFAULT_SWATCH = '#e5e7eb';
-
 const inputClass =
-  'w-full px-4 py-3 md:py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pink-500/50 focus:border-pink-400 focus:bg-white outline-none transition-colors input-touch';
+  'w-full px-4 py-3 md:py-2.5 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-pink-500/50 focus:border-pink-400 outline-none transition-colors input-touch';
 
 export function VariantsEditor({ value, onChange }: VariantsEditorProps) {
   const variants = value || [];
   const enabled = variants.length > 0;
 
   const addVariant = () => {
-    onChange([...variants, { id: makeVariantId(), name: '', hex: null, stock: 0 }]);
+    onChange([...variants, { id: makeVariantId(), name: '', image_url: null, stock: 0 }]);
   };
 
   const updateVariant = (id: string, patch: Partial<ProductVariant>) => {
@@ -52,60 +51,42 @@ export function VariantsEditor({ value, onChange }: VariantsEditorProps) {
       </div>
 
       {enabled && (
-        <div className="mt-4 space-y-2">
-          <div className="hidden sm:grid sm:grid-cols-[auto_1fr_7rem_auto] gap-2 px-1 text-[11px] font-medium uppercase tracking-wider text-gray-400">
-            <span className="w-10">Color</span>
-            <span>Nombre del tono</span>
-            <span>Stock</span>
-            <span className="w-9" />
-          </div>
-
+        <div className="mt-4 space-y-3">
           {variants.map((variant) => (
-            <div
-              key={variant.id}
-              className="grid grid-cols-[auto_1fr_auto] sm:grid-cols-[auto_1fr_7rem_auto] gap-2 items-center"
-            >
-              {/* Swatch: input color nativo dentro de un círculo */}
-              <label
-                className="relative w-10 h-10 rounded-full ring-1 ring-black/10 shadow-sm cursor-pointer shrink-0 overflow-hidden"
-                style={{ backgroundColor: variant.hex || DEFAULT_SWATCH }}
-                title={variant.hex ? `Color ${variant.hex}` : 'Elegir color'}
-              >
+            <div key={variant.id} className="flex items-start gap-3">
+              <VariantImageUpload
+                value={variant.image_url}
+                onChange={(url) => updateVariant(variant.id, { image_url: url })}
+                label={variant.name}
+              />
+
+              <div className="flex-1 min-w-0 grid grid-cols-1 sm:grid-cols-[1fr_7rem] gap-2">
                 <input
-                  type="color"
-                  value={variant.hex || DEFAULT_SWATCH}
-                  onChange={(e) => updateVariant(variant.id, { hex: e.target.value })}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  aria-label={`Color del tono ${variant.name || 'sin nombre'}`}
+                  type="text"
+                  required
+                  placeholder="Nombre del tono (ej. Honey Talks)"
+                  value={variant.name}
+                  onChange={(e) => updateVariant(variant.id, { name: e.target.value })}
+                  className={inputClass}
                 />
-              </label>
-
-              <input
-                type="text"
-                required
-                placeholder="Ej. Rosa Nude"
-                value={variant.name}
-                onChange={(e) => updateVariant(variant.id, { name: e.target.value })}
-                className={inputClass}
-              />
-
-              <input
-                type="number"
-                min={0}
-                required
-                placeholder="Stock"
-                value={variant.stock}
-                onChange={(e) =>
-                  updateVariant(variant.id, { stock: parseInt(e.target.value, 10) || 0 })
-                }
-                className={`${inputClass} col-start-2 sm:col-start-auto`}
-              />
+                <input
+                  type="number"
+                  min={0}
+                  required
+                  placeholder="Stock"
+                  value={variant.stock}
+                  onChange={(e) =>
+                    updateVariant(variant.id, { stock: parseInt(e.target.value, 10) || 0 })
+                  }
+                  className={inputClass}
+                />
+              </div>
 
               <button
                 type="button"
                 onClick={() => removeVariant(variant.id)}
                 title="Quitar tono"
-                className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors shrink-0"
+                className="p-2 mt-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors shrink-0"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
@@ -125,7 +106,8 @@ export function VariantsEditor({ value, onChange }: VariantsEditorProps) {
 
       {enabled && (
         <p className="text-xs text-gray-500 mt-3">
-          El stock del producto pasa a ser la suma de los tonos.
+          La foto de cada tono es lo que el cliente toca para elegirlo. El stock del producto pasa a
+          ser la suma de los tonos.
         </p>
       )}
     </div>

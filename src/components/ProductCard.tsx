@@ -75,14 +75,26 @@ const ProductCard = ({ product, onAddToCart, onView }: ProductCardProps) => {
         {/* Tonos disponibles (solo vista previa: el tono se elige en el detalle) */}
         {withTones && inStock && (
           <div className="mt-2 flex items-center gap-1.5">
-            <div className="flex -space-x-1">
+            <div className="flex -space-x-1.5">
               {shownTones.map((tone) => (
                 <span
                   key={tone.id}
                   title={tone.name}
-                  className="w-4 h-4 rounded-full ring-2 ring-white shadow-sm"
-                  style={{ backgroundColor: tone.hex || '#e5e7eb' }}
-                />
+                  className="w-5 h-5 rounded-full ring-2 ring-white shadow-sm overflow-hidden bg-gray-100 flex items-center justify-center"
+                >
+                  {tone.image_url ? (
+                    <img
+                      src={tone.image_url}
+                      alt={tone.name}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <span className="text-[8px] font-semibold text-gray-500 uppercase">
+                      {tone.name.slice(0, 2)}
+                    </span>
+                  )}
+                </span>
               ))}
             </div>
             <span className="text-[10px] sm:text-xs text-gray-500 font-medium">

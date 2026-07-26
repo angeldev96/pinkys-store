@@ -17,8 +17,10 @@ import {
 } from 'lucide-react';
 import { productsApi, type Product as SupabaseProduct, ProductCategory, ProductGender, ProductBadge } from '@/lib/supabase';
 import { ProductVariant, parseVariants, variantsTotalStock } from '@/lib/variants';
+import { parseImageUrls } from '@/lib/images';
 import { ProductList } from '@/components/admin/ProductList';
 import { VariantsEditor } from '@/components/admin/VariantsEditor';
+import { GalleryUpload } from '@/components/admin/GalleryUpload';
 import { FloatingActionButton } from '@/components/admin/FloatingActionButton';
 import { ImageUpload } from '@/components/admin/ImageUpload';
 import { OrdersList } from '@/components/admin/OrdersList';
@@ -57,6 +59,7 @@ interface Product {
   badge: ProductBadge | null;
   stock: number;
   variants: ProductVariant[];
+  images: string[];
 }
 
 interface FormData {
@@ -69,6 +72,7 @@ interface FormData {
   badge: ProductBadge | null;
   stock: string;
   variants: ProductVariant[];
+  images: string[];
 }
 
 const initialFormData: FormData = {
@@ -81,6 +85,7 @@ const initialFormData: FormData = {
   badge: null,
   stock: '0',
   variants: [],
+  images: [],
 };
 
 export default function AdminDashboardPage() {
@@ -158,6 +163,7 @@ export default function AdminDashboardPage() {
       badge: product.badge,
       stock: product.stock.toString(),
       variants: parseVariants(product.variants),
+      images: parseImageUrls(product.images),
     });
     setShowModal(true);
   };
@@ -258,6 +264,7 @@ export default function AdminDashboardPage() {
           ? variantsTotalStock(variants)
           : parseInt(formData.stock) || 0,
         variants,
+        images: parseImageUrls(formData.images),
       };
 
       if (editingProduct) {
@@ -529,6 +536,11 @@ export default function AdminDashboardPage() {
               <VariantsEditor
                 value={formData.variants}
                 onChange={(variants) => setFormData({ ...formData, variants })}
+              />
+
+              <GalleryUpload
+                value={formData.images}
+                onChange={(images) => setFormData({ ...formData, images })}
               />
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

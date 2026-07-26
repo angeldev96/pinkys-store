@@ -4,12 +4,10 @@
 export interface ProductVariant {
   id: string
   name: string
-  /** Color del swatch en el catálogo. null = se muestra solo el nombre. */
-  hex: string | null
+  /** Foto de ESTE tono. Es el swatch del catálogo y la imagen que se muestra al elegirlo. */
+  image_url: string | null
   stock: number
 }
-
-const HEX_PATTERN = /^#[0-9a-f]{6}$/i
 
 export function makeVariantId(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -25,8 +23,8 @@ function parseVariant(value: unknown): ProductVariant | null {
   const name = typeof raw.name === 'string' ? raw.name.trim() : ''
   if (!name) return null
 
-  const hex = typeof raw.hex === 'string' && HEX_PATTERN.test(raw.hex.trim())
-    ? raw.hex.trim().toLowerCase()
+  const imageUrl = typeof raw.image_url === 'string' && raw.image_url.trim()
+    ? raw.image_url.trim()
     : null
 
   const stock = Number(raw.stock)
@@ -34,7 +32,7 @@ function parseVariant(value: unknown): ProductVariant | null {
   return {
     id: typeof raw.id === 'string' && raw.id ? raw.id : makeVariantId(),
     name,
-    hex,
+    image_url: imageUrl,
     stock: Number.isFinite(stock) && stock > 0 ? Math.floor(stock) : 0,
   }
 }

@@ -1,5 +1,6 @@
 import { productsApi, Product as SupabaseProduct, ProductCategory, ProductGender, ProductBadge } from '@/lib/supabase'
 import { ProductVariant, parseVariants } from '@/lib/variants'
+import { parseImageUrls } from '@/lib/images'
 
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=400&fit=crop'
 
@@ -16,6 +17,8 @@ export interface Product {
   stock?: number;
   /** Tonos del producto. Vacío = producto sin tonos. */
   variants: ProductVariant[];
+  /** Fotos extra, aparte de la portada y de la foto de cada tono. */
+  images: string[];
 }
 
 export type CartItem = Product & {
@@ -38,6 +41,7 @@ function toProduct(row: SupabaseProduct): Product {
     badge: row.badge,
     stock: row.stock,
     variants: parseVariants(row.variants),
+    images: parseImageUrls(row.images),
   }
 }
 

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { X, Plus, Check } from 'lucide-react';
 import { Product } from '@/data/products';
 import { ProductVariant, availableVariants, hasVariants } from '@/lib/variants';
+import { productGallery } from '@/lib/images';
 
 interface ProductDetailDrawerProps {
   isOpen: boolean;
@@ -19,14 +20,17 @@ const badgeStyles: Record<string, string> = {
 
 export function ProductDetailDrawer({ isOpen, onClose, product, onAddToCart }: ProductDetailDrawerProps) {
   const [selectedToneId, setSelectedToneId] = useState<string | null>(null);
+  const [activeImage, setActiveImage] = useState<string | null>(null);
   const [shownProductId, setShownProductId] = useState<string | null>(null);
 
-  // Al cambiar de producto se olvida el tono elegido del anterior. Si solo hay
+  // Al cambiar de producto se olvida el tono y la foto del anterior. Si solo hay
   // un tono disponible, se preselecciona para no pedir un clic de más.
   if (product && product.id !== shownProductId) {
     setShownProductId(product.id);
     const inStockTones = availableVariants(product.variants);
-    setSelectedToneId(inStockTones.length === 1 ? inStockTones[0].id : null);
+    const onlyTone = inStockTones.length === 1 ? inStockTones[0] : null;
+    setSelectedToneId(onlyTone?.id ?? null);
+    setActiveImage(onlyTone?.image_url ?? null);
   }
 
   if (!isOpen || !product) return null;
@@ -40,6 +44,21 @@ export function ProductDetailDrawer({ isOpen, onClose, product, onAddToCart }: P
     ? tones.find((tone) => tone.id === selectedToneId) || null
     : null;
   const canAdd = inStock && (!withTones || selectedTone !== null);
+
+  const gallery = productGallery(product);
+  const mainImage = activeImage || selectedTone?.image_url || product.image;
+
+  const selectTone = (tone: ProductVariant) => {
+    setSelectedToneId(tone.id);
+    if (tone.image_url) setActiveImage(tone.image_url);
+  };
+
+  // Tocar una foto de la galería que pertenece a un tono también lo elige.
+  const selectImage = (url: string) => {
+    setActiveImage(url);
+    const owner = tones.find((tone) => tone.image_url === url && tone.stock > 0);
+    if (owner) setSelectedToneId(owner.id);
+  };
 
   const handleAdd = () => {
     if (!canAdd) return;
@@ -66,13 +85,37 @@ export function ProductDetailDrawer({ isOpen, onClose, product, onAddToCart }: P
             <X className="w-6 h-6 md:w-5 md:h-5" />
           </button>
 
-          {/* Product Image */}
-          <div className="relative flex-1 md:flex-none md:w-1/2 md:shrink-0 bg-gray-50 flex items-center justify-center p-8 fade-in">
-            <img
-              src={product.image}
-              alt={product.name}
-              className="max-w-full max-h-full md:max-h-[70vh] object-contain fade-in-scale"
-            />
+          {/* Foto principal + galería */}
+          <div className="relative flex-1 md:flex-none md:w-1/2 md:shrink-0 bg-gray-50 flex flex-col items-center justify-center p-6 md:p-8 gap-3 fade-in min-h-0">
+            <div className="flex-1 w-full flex items-center justify-center min-h-0">
+              <img
+                key={mainImage}
+                src={mainImage}
+                alt={selectedTone ? `${product.name} - ${selectedTone.name}` : product.name}
+                className="max-w-full max-h-full md:max-h-[58vh] object-contain fade-in-scale"
+              />
+            </div>
+
+            {gallery.length > 1 && (
+              <div className="w-full flex gap-2 overflow-x-auto scrollbar-hide shrink-0">
+                {gallery.map((url) => (
+                  <button
+                    key={url}
+                    type="button"
+                    onClick={() => selectImage(url)}
+                    aria-label="Ver foto"
+                    className={`w-14 h-14 shrink-0 rounded-lg overflow-hidden border-2 transition-all duration-200 scale-on-active ${
+                      url === mainImage
+                        ? 'border-pink-600 shadow-sm'
+                        : 'border-transparent opacity-70 hover:opacity-100'
+                    }`}
+                  >
+                    <img src={url} alt="" className="w-full h-full object-cover" loading="lazy" />
+                  </button>
+                ))}
+              </div>
+            )}
+
             {/* Badge */}
             {product.badge && (
               <span className={`absolute top-4 left-4 px-3 py-1 text-sm font-bold rounded-full shadow-md ${badgeStyles[product.badge] || 'bg-gray-500 text-white'}`}>
@@ -112,18 +155,14 @@ export function ProductDetailDrawer({ isOpen, onClose, product, onAddToCart }: P
               </p>
             )}
 
-            {/* Selector de tono */}
+            {/* Selector de tono: la foto de cada tono es el swatch */}
             {withTones && (
               <div className="mt-5 fade-in">
-                <div className="flex items-baseline justify-between">
-                  <span className="text-sm font-semibold text-gray-900">
-                    Elegí tu tono
+                <div className="flex items-baseline gap-2">
+                  <span className="text-sm font-semibold text-gray-900">Tono</span>
+                  <span className="text-sm text-gray-500 truncate">
+                    {selectedTone ? selectedTone.name : 'elegí uno'}
                   </span>
-                  {selectedTone && (
-                    <span className="text-xs text-gray-500">
-                      {selectedTone.name}
-                    </span>
-                  )}
                 </div>
 
                 <div className="mt-2 flex flex-wrap gap-2">
@@ -135,22 +174,35 @@ export function ProductDetailDrawer({ isOpen, onClose, product, onAddToCart }: P
                       <button
                         key={tone.id}
                         type="button"
-                        onClick={() => !soldOut && setSelectedToneId(tone.id)}
+                        onClick={() => !soldOut && selectTone(tone)}
                         disabled={soldOut}
                         aria-pressed={selected}
-                        className={`flex items-center gap-2 pl-1.5 pr-3 py-1.5 rounded-full border text-sm transition-all duration-200 scale-on-active ${
+                        title={soldOut ? `${tone.name} (agotado)` : tone.name}
+                        className={`relative w-14 h-14 rounded-full overflow-hidden bg-gray-100 border-2 transition-all duration-200 scale-on-active ${
                           soldOut
-                            ? 'border-gray-200 text-gray-400 line-through cursor-not-allowed opacity-60'
+                            ? 'border-gray-200 opacity-40 cursor-not-allowed'
                             : selected
-                              ? 'border-pink-600 bg-pink-50 text-pink-700 ring-2 ring-pink-500/30 font-semibold'
-                              : 'border-gray-200 text-gray-700 hover:border-pink-300 hover:bg-pink-50/50'
+                              ? 'border-pink-600 ring-2 ring-pink-500/30'
+                              : 'border-gray-200 hover:border-pink-300'
                         }`}
                       >
-                        <span
-                          className="w-5 h-5 rounded-full ring-1 ring-black/10 shrink-0"
-                          style={{ backgroundColor: tone.hex || '#e5e7eb' }}
-                        />
-                        {tone.name}
+                        {tone.image_url ? (
+                          <img
+                            src={tone.image_url}
+                            alt={tone.name}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <span className="w-full h-full flex items-center justify-center px-1 text-[10px] font-semibold text-gray-600 text-center leading-tight">
+                            {tone.name}
+                          </span>
+                        )}
+                        {soldOut && (
+                          <span className="absolute inset-x-0 bottom-0 bg-gray-900/70 text-white text-[8px] font-bold py-0.5">
+                            AGOTADO
+                          </span>
+                        )}
                       </button>
                     );
                   })}
@@ -158,7 +210,7 @@ export function ProductDetailDrawer({ isOpen, onClose, product, onAddToCart }: P
 
                 {!selectedTone && inStock && (
                   <p className="text-xs text-gray-500 mt-2">
-                    Seleccioná un tono para agregarlo al carrito
+                    Tocá un tono para agregarlo al carrito
                   </p>
                 )}
               </div>
