@@ -1,9 +1,10 @@
-import { Plus } from 'lucide-react';
+import { Plus, Palette } from 'lucide-react';
 import { Product } from '@/data/products';
+import { ProductVariant, availableVariants, hasVariants } from '@/lib/variants';
 
 interface ProductCardProps {
   product: Product;
-  onAddToCart: (product: Product) => void;
+  onAddToCart: (product: Product, variant?: ProductVariant | null) => void;
   onView?: (product: Product) => void;
 }
 
@@ -14,6 +15,9 @@ const badgeStyles: Record<string, string> = {
   'Premium': 'bg-purple-500 text-white',
 };
 
+// Cuántos círculos de tono caben en la card antes de resumir con "+N".
+const MAX_SWATCHES = 5;
+
 const ProductCard = ({ product, onAddToCart, onView }: ProductCardProps) => {
   const handleCardClick = () => {
     if (onView) {
@@ -21,7 +25,11 @@ const ProductCard = ({ product, onAddToCart, onView }: ProductCardProps) => {
     }
   };
 
-  const inStock = (product.stock ?? 0) > 0;
+  const withTones = hasVariants(product.variants);
+  const tones = availableVariants(product.variants);
+  const inStock = withTones ? tones.length > 0 : (product.stock ?? 0) > 0;
+  const shownTones = tones.slice(0, MAX_SWATCHES);
+  const hiddenTones = tones.length - shownTones.length;
 
   return (
     <article
@@ -64,6 +72,26 @@ const ProductCard = ({ product, onAddToCart, onView }: ProductCardProps) => {
           {product.name}
         </h3>
 
+        {/* Tonos disponibles (solo vista previa: el tono se elige en el detalle) */}
+        {withTones && inStock && (
+          <div className="mt-2 flex items-center gap-1.5">
+            <div className="flex -space-x-1">
+              {shownTones.map((tone) => (
+                <span
+                  key={tone.id}
+                  title={tone.name}
+                  className="w-4 h-4 rounded-full ring-2 ring-white shadow-sm"
+                  style={{ backgroundColor: tone.hex || '#e5e7eb' }}
+                />
+              ))}
+            </div>
+            <span className="text-[10px] sm:text-xs text-gray-500 font-medium">
+              {hiddenTones > 0 ? `+${hiddenTones} ` : ''}
+              {tones.length === 1 ? '1 tono' : `${tones.length} tonos`}
+            </span>
+          </div>
+        )}
+
         {/* Price & Add Button */}
         <div className="mt-2 flex items-center justify-between gap-2">
           <span className="text-lg sm:text-xl font-bold text-pink-600 transition-transform duration-200 group-hover:scale-105">
@@ -72,7 +100,13 @@ const ProductCard = ({ product, onAddToCart, onView }: ProductCardProps) => {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              if (inStock) onAddToCart(product);
+              if (!inStock) return;
+              // Con tonos no se agrega a ciegas: se abre el detalle a elegir.
+              if (withTones) {
+                onView?.(product);
+                return;
+              }
+              onAddToCart(product);
             }}
             disabled={!inStock}
             className={`p-2 rounded-lg transition-all duration-200 scale-on-active shrink-0 shadow-md ${
@@ -80,9 +114,15 @@ const ProductCard = ({ product, onAddToCart, onView }: ProductCardProps) => {
                 ? 'bg-pink-600 hover:bg-pink-700 text-white hover:shadow-lg'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed shadow-none'
             }`}
-            aria-label={inStock ? `Agregar ${product.name} al carrito` : `${product.name} agotado`}
+            aria-label={
+              !inStock
+                ? `${product.name} agotado`
+                : withTones
+                  ? `Elegir tono de ${product.name}`
+                  : `Agregar ${product.name} al carrito`
+            }
           >
-            <Plus className="w-5 h-5" />
+            {inStock && withTones ? <Palette className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
           </button>
         </div>
       </div>

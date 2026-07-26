@@ -1,15 +1,18 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Product, CartItem } from '@/data/products';
+import { ProductVariant, cartLineId, parseVariants } from '@/lib/variants';
 
 // Versioned so a future change to CartItem can bump the key instead of
-// crashing on carts saved by an older build.
-const STORAGE_KEY = 'pinkys-cart-v1';
+// crashing on carts saved by an older build. v2 añadió tonos: cada línea se
+// identifica por lineId (producto + tono), ya no por el id del producto.
+const STORAGE_KEY = 'pinkys-cart-v2';
 
 function isCartItem(value: unknown): value is CartItem {
   if (typeof value !== 'object' || value === null) return false;
   const item = value as Partial<CartItem>;
   return (
     typeof item.id === 'string' &&
+    typeof item.lineId === 'string' &&
     typeof item.name === 'string' &&
     typeof item.price === 'number' &&
     Number.isFinite(item.price) &&
@@ -25,11 +28,20 @@ function readStoredCart(): CartItem[] {
     if (!raw) return [];
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter(isCartItem);
+    return parsed.filter(isCartItem).map((item) => ({
+      ...item,
+      variants: parseVariants(item.variants),
+    }));
   } catch {
     // Corrupted JSON, or storage blocked (Safari private mode).
     return [];
   }
+}
+
+/** Techo de unidades de una línea: el stock del tono, o el del producto. */
+function maxQuantity(item: Pick<CartItem, 'variant' | 'stock'>): number {
+  const stock = item.variant ? item.variant.stock : item.stock;
+  return Number.isFinite(stock) && stock > 0 ? stock : Infinity;
 }
 
 export const useCart = () => {
@@ -65,32 +77,38 @@ export const useCart = () => {
     return () => window.removeEventListener('storage', handleStorage);
   }, []);
 
-  const addToCart = useCallback((product: Product) => {
+  const addToCart = useCallback((product: Product, variant?: ProductVariant | null) => {
+    const chosen = variant ?? null;
+    const lineId = cartLineId(product.id, chosen?.id);
+
     setCartItems(prev => {
-      const existingItem = prev.find(item => item.id === product.id);
+      const existingItem = prev.find(item => item.lineId === lineId);
       if (existingItem) {
+        const limit = maxQuantity(existingItem);
         return prev.map(item =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
+          item.lineId === lineId
+            ? { ...item, quantity: Math.min(item.quantity + 1, limit) }
             : item
         );
       }
-      return [...prev, { ...product, quantity: 1 }];
+      return [...prev, { ...product, lineId, variant: chosen, quantity: 1 }];
     });
   }, []);
 
-  const removeFromCart = useCallback((productId: string) => {
-    setCartItems(prev => prev.filter(item => item.id !== productId));
+  const removeFromCart = useCallback((lineId: string) => {
+    setCartItems(prev => prev.filter(item => item.lineId !== lineId));
   }, []);
 
-  const updateQuantity = useCallback((productId: string, quantity: number) => {
+  const updateQuantity = useCallback((lineId: string, quantity: number) => {
     if (quantity <= 0) {
-      removeFromCart(productId);
+      removeFromCart(lineId);
       return;
     }
     setCartItems(prev =>
       prev.map(item =>
-        item.id === productId ? { ...item, quantity } : item
+        item.lineId === lineId
+          ? { ...item, quantity: Math.min(quantity, maxQuantity(item)) }
+          : item
       )
     );
   }, [removeFromCart]);

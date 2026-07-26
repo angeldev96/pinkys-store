@@ -16,7 +16,9 @@ import {
   ClipboardList,
 } from 'lucide-react';
 import { productsApi, type Product as SupabaseProduct, ProductCategory, ProductGender, ProductBadge } from '@/lib/supabase';
+import { ProductVariant, parseVariants, variantsTotalStock } from '@/lib/variants';
 import { ProductList } from '@/components/admin/ProductList';
+import { VariantsEditor } from '@/components/admin/VariantsEditor';
 import { FloatingActionButton } from '@/components/admin/FloatingActionButton';
 import { ImageUpload } from '@/components/admin/ImageUpload';
 import { OrdersList } from '@/components/admin/OrdersList';
@@ -54,6 +56,7 @@ interface Product {
   image_url: string | null;
   badge: ProductBadge | null;
   stock: number;
+  variants: ProductVariant[];
 }
 
 interface FormData {
@@ -65,6 +68,7 @@ interface FormData {
   image_url: string;
   badge: ProductBadge | null;
   stock: string;
+  variants: ProductVariant[];
 }
 
 const initialFormData: FormData = {
@@ -76,6 +80,7 @@ const initialFormData: FormData = {
   image_url: '',
   badge: null,
   stock: '0',
+  variants: [],
 };
 
 export default function AdminDashboardPage() {
@@ -152,6 +157,7 @@ export default function AdminDashboardPage() {
       image_url: product.image_url || '',
       badge: product.badge,
       stock: product.stock.toString(),
+      variants: parseVariants(product.variants),
     });
     setShowModal(true);
   };
@@ -222,6 +228,15 @@ export default function AdminDashboardPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // parseVariants descarta los tonos sin nombre, así que una fila vacía se
+    // perdería en silencio: mejor avisar antes de guardar.
+    const variants = parseVariants(formData.variants);
+    if (variants.length !== formData.variants.length) {
+      showNotification('error', 'Cada tono necesita un nombre');
+      return;
+    }
+
     setSaving(true);
 
     try {
@@ -238,7 +253,11 @@ export default function AdminDashboardPage() {
         genero: formData.genero,
         image_url: formData.image_url || null,
         badge: formData.badge,
-        stock: parseInt(formData.stock) || 0,
+        // Con tonos, el stock del producto es la suma de sus tonos.
+        stock: variants.length > 0
+          ? variantsTotalStock(variants)
+          : parseInt(formData.stock) || 0,
+        variants,
       };
 
       if (editingProduct) {
@@ -490,12 +509,27 @@ export default function AdminDashboardPage() {
                   <input
                     type="number"
                     required
-                    value={formData.stock}
+                    disabled={formData.variants.length > 0}
+                    value={
+                      formData.variants.length > 0
+                        ? variantsTotalStock(formData.variants)
+                        : formData.stock
+                    }
                     onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                    className="w-full px-4 py-3 md:py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pink-500/50 focus:border-pink-400 focus:bg-white outline-none transition-colors input-touch"
+                    className="w-full px-4 py-3 md:py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pink-500/50 focus:border-pink-400 focus:bg-white outline-none transition-colors input-touch disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
                   />
+                  {formData.variants.length > 0 && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Suma del stock de los tonos
+                    </p>
+                  )}
                 </div>
               </div>
+
+              <VariantsEditor
+                value={formData.variants}
+                onChange={(variants) => setFormData({ ...formData, variants })}
+              />
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>

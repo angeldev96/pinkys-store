@@ -1,5 +1,7 @@
 import { Edit, Trash2 } from 'lucide-react';
 import { ProductCategory, ProductGender, ProductBadge } from '@/lib/supabase';
+import { ProductVariant } from '@/lib/variants';
+import { VariantSwatches } from './VariantSwatches';
 
 interface ProductCardProps {
   id: string;
@@ -11,6 +13,7 @@ interface ProductCardProps {
   image_url: string | null;
   badge: ProductBadge | null;
   stock: number;
+  variants?: ProductVariant[];
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
 }
@@ -45,6 +48,7 @@ export function ProductCard({
   image_url,
   badge,
   stock,
+  variants,
   onEdit,
   onDelete,
 }: ProductCardProps) {
@@ -112,6 +116,8 @@ export function ProductCard({
               Stock: {stock}
             </span>
           </div>
+
+          <VariantSwatches variants={variants} />
         </div>
       </div>
 
