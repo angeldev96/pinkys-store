@@ -83,6 +83,14 @@ export function VariantImageUpload({ value, onChange, label }: VariantImageUploa
         )}
       </div>
 
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/gif"
+        onChange={handleFileChange}
+        className="hidden"
+      />
+
       {error && <p className="text-[10px] text-red-600 mt-1">{error}</p>}
     </div>
   );
