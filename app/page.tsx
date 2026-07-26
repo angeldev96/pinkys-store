@@ -10,6 +10,7 @@ import { WhatsAppButton } from '@/components/WhatsAppButton';
 import { CartToast } from '@/components/CartToast';
 import { useCart } from '@/hooks/useCart';
 import { Product } from '@/data/products';
+import { ProductVariant } from '@/lib/variants';
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -27,9 +28,10 @@ export default function Home() {
     closeCart
   } = useCart();
 
-  const handleAddToCart = useCallback((product: Product) => {
-    addToCart(product);
-    setToastMessage(`${product.name} agregado al carrito`);
+  const handleAddToCart = useCallback((product: Product, variant?: ProductVariant | null) => {
+    addToCart(product, variant);
+    const label = variant ? `${product.name} (${variant.name})` : product.name;
+    setToastMessage(`${label} agregado al carrito`);
     setToastKey(k => k + 1);
   }, [addToCart]);
 

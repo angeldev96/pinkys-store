@@ -1,4 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
+import { ProductVariant, parseVariants, variantsTotalStock } from './variants'
+import { parseImageUrls } from './images'
+
+export type { ProductVariant }
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -20,6 +24,10 @@ export interface Product {
   image_url: string | null
   badge: ProductBadge | null
   stock: number
+  /** Tonos del producto. Vacío = producto sin tonos. */
+  variants: ProductVariant[]
+  /** Fotos extra, aparte de image_url y de la foto de cada tono. */
+  images: string[]
   created_at: string
   updated_at: string
 }
@@ -33,6 +41,8 @@ export interface CreateProductInput {
   image_url?: string
   badge?: ProductBadge
   stock?: number
+  variants?: ProductVariant[]
+  images?: string[]
 }
 
 export interface UpdateProductInput {
@@ -44,6 +54,20 @@ export interface UpdateProductInput {
   image_url?: string
   badge?: ProductBadge
   stock?: number
+  variants?: ProductVariant[]
+  images?: string[]
+}
+
+/**
+ * Deja la fila lista para escribir: tonos normalizados y, si el producto maneja
+ * tonos, el stock del producto pasa a ser la suma de ellos.
+ */
+function withVariantStock<T extends { stock?: number; variants?: unknown }>(input: T) {
+  const variants = parseVariants(input.variants)
+  return {
+    variants,
+    stock: variants.length > 0 ? variantsTotalStock(variants) : input.stock,
+  }
 }
 
 export type OrderStatus = 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled'
@@ -136,6 +160,8 @@ export const productsApi = {
 
   // Create product
   async create(input: CreateProductInput) {
+    const normalized = withVariantStock(input)
+
     const { data, error } = await supabase
       .from('products')
       .insert({
@@ -146,7 +172,9 @@ export const productsApi = {
         genero: input.genero || 'unisex',
         image_url: input.image_url || null,
         badge: input.badge || null,
-        stock: input.stock ?? 0,
+        stock: normalized.stock ?? 0,
+        variants: normalized.variants,
+        images: parseImageUrls(input.images),
       })
       .select()
       .single()
@@ -156,9 +184,19 @@ export const productsApi = {
 
   // Update product
   async update(id: string, input: UpdateProductInput) {
+    // Solo se toca `variants`/`stock` si el caller los mandó; un update parcial
+    // de, por ejemplo, el precio no debe borrar los tonos.
+    const patch: Record<string, unknown> = { ...input }
+    if (input.variants !== undefined) {
+      Object.assign(patch, withVariantStock(input))
+    }
+    if (input.images !== undefined) {
+      patch.images = parseImageUrls(input.images)
+    }
+
     const { data, error } = await supabase
       .from('products')
-      .update(input)
+      .update(patch)
       .eq('id', id)
       .select()
       .single()

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback } from 'react';
 import { Upload, X, Loader2, Camera, Sparkles } from 'lucide-react';
-import { createBrowserClient } from '@supabase/ssr';
+import { useImageUpload } from '@/hooks/useImageUpload';
 
 interface ImageUploadProps {
   value: string;
@@ -15,65 +15,23 @@ interface ImageUploadProps {
 }
 
 export function ImageUpload({ value, onChange, onUploading, onFilePicked, analyzing }: ImageUploadProps) {
-  const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [lastFile, setLastFile] = useState<File | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
+  const { upload, uploading, error, setError } = useImageUpload();
 
   const handleUpload = useCallback(async (file: File) => {
-    if (!file.type.startsWith('image/')) {
-      setError('Solo se permiten archivos de imagen');
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      setError('La imagen no puede ser mayor a 5MB');
-      return;
-    }
-
-    setError(null);
     setLastFile(file);
     // Kick off the AI analysis in parallel with the upload.
     onFilePicked?.(file);
-    setUploading(true);
     onUploading?.(true);
 
-    try {
-      // Use createBrowserClient so it shares the auth session (cookies) with the admin dashboard
-      const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      );
+    const url = await upload(file);
+    if (url) onChange(url);
 
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = `products/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('product-images')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false,
-        });
-
-      if (uploadError) {
-        setError(uploadError.message);
-      } else {
-        const { data: { publicUrl } } = supabase.storage
-          .from('product-images')
-          .getPublicUrl(filePath);
-
-        onChange(publicUrl);
-      }
-    } catch (err: any) {
-      setError(err.message || 'Error al subir la imagen');
-    } finally {
-      setUploading(false);
-      onUploading?.(false);
-    }
-  }, [onChange, onUploading, onFilePicked]);
+    onUploading?.(false);
+  }, [upload, onChange, onUploading, onFilePicked]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

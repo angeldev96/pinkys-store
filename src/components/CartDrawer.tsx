@@ -7,8 +7,9 @@ interface CartDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   items: CartItem[];
-  onUpdateQuantity: (productId: string, quantity: number) => void;
-  onRemove: (productId: string) => void;
+  /** lineId, no id de producto: dos tonos del mismo producto son dos líneas. */
+  onUpdateQuantity: (lineId: string, quantity: number) => void;
+  onRemove: (lineId: string) => void;
   totalPrice: number;
 }
 
@@ -30,6 +31,9 @@ const CartDrawer = ({
 
     items.forEach((item, index) => {
       message += `${index + 1}. *${item.name}*\n`;
+      if (item.variant) {
+        message += `   Tono: ${item.variant.name}\n`;
+      }
       message += `   Cantidad: ${item.quantity}\n`;
       message += `   Precio: L${(item.price * item.quantity).toFixed(2)}\n\n`;
     });
@@ -98,7 +102,7 @@ const CartDrawer = ({
             <div className="space-y-3 stagger-in">
               {items.map((item, index) => (
                 <div
-                  key={item.id}
+                  key={item.lineId}
                   className="bg-white rounded-xl p-3 shadow-sm border border-gray-100 fade-in"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
@@ -106,8 +110,8 @@ const CartDrawer = ({
                     {/* Image */}
                     <div className="w-20 h-20 rounded-lg overflow-hidden shrink-0 bg-gray-100">
                       <img
-                        src={item.image}
-                        alt={item.name}
+                        src={item.variant?.image_url || item.image}
+                        alt={item.variant ? `${item.name} - ${item.variant.name}` : item.name}
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -120,6 +124,18 @@ const CartDrawer = ({
                       <p className="text-xs text-gray-500 capitalize mt-0.5">
                         {item.category} · {item.genero}
                       </p>
+                      {item.variant && (
+                        <span className="inline-flex items-center gap-1.5 mt-1 pl-1 pr-2 py-0.5 bg-gray-100 rounded-full text-xs text-gray-700">
+                          {item.variant.image_url && (
+                            <img
+                              src={item.variant.image_url}
+                              alt=""
+                              className="w-4 h-4 rounded-full object-cover ring-1 ring-black/10"
+                            />
+                          )}
+                          {item.variant.name}
+                        </span>
+                      )}
                       <p className="font-bold text-pink-600 text-base mt-1">
                         L{item.price.toFixed(2)}
                       </p>
@@ -130,7 +146,7 @@ const CartDrawer = ({
                   <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
                     <div className="flex items-center gap-1">
                       <button
-                        onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
+                        onClick={() => onUpdateQuantity(item.lineId, item.quantity - 1)}
                         className="w-9 h-9 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-lg transition-all duration-200 scale-on-active"
                       >
                         <Minus className="w-4 h-4" />
@@ -139,14 +155,14 @@ const CartDrawer = ({
                         {item.quantity}
                       </span>
                       <button
-                        onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
+                        onClick={() => onUpdateQuantity(item.lineId, item.quantity + 1)}
                         className="w-9 h-9 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-lg transition-all duration-200 scale-on-active"
                       >
                         <Plus className="w-4 h-4" />
                       </button>
                     </div>
                     <button
-                      onClick={() => onRemove(item.id)}
+                      onClick={() => onRemove(item.lineId)}
                       className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200 scale-on-active"
                     >
                       <Trash2 className="w-4 h-4" />

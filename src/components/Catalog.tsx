@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Sparkles } from 'lucide-react';
 import { Product, getProducts, searchProducts } from '@/data/products';
+import { ProductVariant } from '@/lib/variants';
 import ProductCard from './ProductCard';
 import { ProductDetailDrawer } from './ProductDetailDrawer';
 
@@ -11,7 +12,7 @@ type Gender = 'todo' | 'unisex' | 'caballero' | 'dama';
 
 interface CatalogProps {
   searchQuery: string;
-  onAddToCart: (product: Product) => void;
+  onAddToCart: (product: Product, variant?: ProductVariant | null) => void;
 }
 
 const categories: { id: Category; label: string }[] = [
@@ -72,7 +73,9 @@ const Catalog = ({ searchQuery, onAddToCart }: CatalogProps) => {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(p =>
         p.name.toLowerCase().includes(query) ||
-        p.category.toLowerCase().includes(query)
+        p.category.toLowerCase().includes(query) ||
+        // Buscar por tono: "labial rosa nude"
+        (p.variants || []).some(v => v.name.toLowerCase().includes(query))
       );
     }
 

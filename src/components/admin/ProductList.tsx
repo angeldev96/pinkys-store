@@ -1,6 +1,8 @@
 import { ProductCard } from './ProductCard';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ProductCategory, ProductGender, ProductBadge } from '@/lib/supabase';
+import { ProductVariant } from '@/lib/variants';
+import { VariantSwatches } from './VariantSwatches';
 import { Edit, Trash2, Search, Loader2, ImageOff } from 'lucide-react';
 
 interface Product {
@@ -13,6 +15,7 @@ interface Product {
   image_url: string | null;
   badge: ProductBadge | null;
   stock: number;
+  variants?: ProductVariant[];
 }
 
 interface ProductListProps {
@@ -146,6 +149,7 @@ export function ProductList({ products, loading, searchQuery, onEdit, onDelete }
                             {product.description}
                           </p>
                         )}
+                        <VariantSwatches variants={product.variants} />
                       </div>
                     </div>
                   </td>
