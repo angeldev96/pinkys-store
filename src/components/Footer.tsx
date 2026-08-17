@@ -131,7 +131,7 @@ const Footer = () => {
             © {new Date().getFullYear()} Pinky&apos;s Store. Todos los derechos reservados.
           </p>
           <a
-            href="https://personal-porfolio-tan.vercel.app/"
+            href="https://angelvalladares.dev/es"
             target="_blank"
             rel="noopener noreferrer"
             className="text-sm text-primary-foreground/60 flex items-center gap-1 hover:text-primary-foreground/80 transition-colors"
