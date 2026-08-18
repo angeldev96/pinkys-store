@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { Instagram, Facebook, Mail, MapPin, Heart } from 'lucide-react';
 
 const Footer = () => {
@@ -8,7 +9,7 @@ const Footer = () => {
           {/* Brand */}
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <img
+              <Image
                 src="/pinkys-logo.jpg"
                 alt="Logo de Pinky's Store - Tienda de cosméticos y joyería en Honduras"
                 className="w-12 h-12 rounded-full object-cover"

@@ -1,4 +1,9 @@
-import { productsApi, Product as SupabaseProduct, ProductCategory, ProductGender, ProductBadge } from '@/lib/supabase'
+import type {
+  Product as SupabaseProduct,
+  ProductCategory,
+  ProductGender,
+  ProductBadge,
+} from '@/lib/supabase'
 
 // Frontend-compatible product type
 export interface Product {
@@ -15,68 +20,91 @@ export interface Product {
 
 export type CartItem = Product & { quantity: number };
 
-// Fetch products from Supabase
-export async function getProducts(category?: ProductCategory): Promise<Product[]> {
-  const { data, error } = await productsApi.getAll(category)
+const PLACEHOLDER_IMAGE =
+  'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=400&fit=crop'
 
-  if (error) {
+// The storefront only ever reads products, so it talks to PostgREST directly
+// instead of pulling the whole supabase-js client (auth + realtime + storage)
+// into the public bundle.
+const REST_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/products`
+const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string
+const COLUMNS = 'id,name,description,price,category,genero,image_url,badge,stock'
+
+type ProductRow = Pick<
+  SupabaseProduct,
+  'id' | 'name' | 'description' | 'price' | 'category' | 'genero' | 'image_url' | 'badge' | 'stock'
+>
+
+async function queryProducts(params: URLSearchParams): Promise<ProductRow[]> {
+  params.set('select', COLUMNS)
+
+  const response = await fetch(`${REST_URL}?${params.toString()}`, {
+    headers: {
+      apikey: ANON_KEY,
+      Authorization: `Bearer ${ANON_KEY}`,
+    },
+  })
+
+  if (!response.ok) {
+    throw new Error(`Supabase REST ${response.status}: ${await response.text()}`)
+  }
+
+  return response.json()
+}
+
+function toProduct(row: ProductRow): Product {
+  return {
+    id: row.id,
+    name: row.name,
+    description: row.description,
+    price: Number(row.price),
+    category: row.category,
+    genero: row.genero,
+    image: row.image_url || PLACEHOLDER_IMAGE,
+    badge: row.badge,
+    stock: row.stock,
+  }
+}
+
+// Fetch products
+export async function getProducts(category?: ProductCategory): Promise<Product[]> {
+  const params = new URLSearchParams({ order: 'created_at.desc' })
+  if (category) {
+    params.set('category', `eq.${category}`)
+  }
+
+  try {
+    return (await queryProducts(params)).map(toProduct)
+  } catch (error) {
     console.error('Error fetching products:', error)
     return []
   }
-
-  return (data || []).map(p => ({
-    id: p.id,
-    name: p.name,
-    description: p.description,
-    price: Number(p.price),
-    category: p.category,
-    genero: p.genero,
-    image: p.image_url || 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=400&fit=crop',
-    badge: p.badge,
-    stock: p.stock,
-  }))
 }
 
 // Search products
 export async function searchProducts(query: string): Promise<Product[]> {
-  const { data, error } = await productsApi.search(query)
+  const params = new URLSearchParams({
+    or: `(name.ilike.*${query}*,description.ilike.*${query}*)`,
+    order: 'name.asc',
+  })
 
-  if (error) {
+  try {
+    return (await queryProducts(params)).map(toProduct)
+  } catch (error) {
     console.error('Error searching products:', error)
     return []
   }
-
-  return (data || []).map(p => ({
-    id: p.id,
-    name: p.name,
-    description: p.description,
-    price: Number(p.price),
-    category: p.category,
-    genero: p.genero,
-    image: p.image_url || 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=400&fit=crop',
-    badge: p.badge,
-    stock: p.stock,
-  }))
 }
 
 // Get single product
 export async function getProduct(id: string): Promise<Product | null> {
-  const { data, error } = await productsApi.getById(id)
+  const params = new URLSearchParams({ id: `eq.${id}`, limit: '1' })
 
-  if (error || !data) {
+  try {
+    const [row] = await queryProducts(params)
+    return row ? toProduct(row) : null
+  } catch (error) {
     console.error('Error fetching product:', error)
     return null
-  }
-
-  return {
-    id: data.id,
-    name: data.name,
-    description: data.description,
-    price: Number(data.price),
-    category: data.category,
-    genero: data.genero,
-    image: data.image_url || 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=400&fit=crop',
-    badge: data.badge,
-    stock: data.stock,
   }
 }

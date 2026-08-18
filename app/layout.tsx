@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Playfair_Display, Poppins } from "next/font/google";
 import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import {
@@ -9,12 +9,26 @@ import {
   BreadcrumbSchema,
 } from "@/components/StructuredData";
 
-const inter = Inter({
+// Self-hosted by next/font: no render-blocking request to fonts.googleapis.com.
+const playfair = Playfair_Display({
   subsets: ["latin"],
   display: "swap",
+  variable: "--font-playfair",
+});
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+  variable: "--font-poppins",
 });
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.pinkysstorehn.com";
+
+// Products are fetched from Supabase on the client, so warm the connection early.
+const SUPABASE_ORIGIN = process.env.NEXT_PUBLIC_SUPABASE_URL
+  ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin
+  : null;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -131,8 +145,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es-HN" dir="ltr">
+    <html lang="es-HN" dir="ltr" className={`${playfair.variable} ${poppins.variable}`}>
       <head>
+        {SUPABASE_ORIGIN && (
+          <>
+            <link rel="preconnect" href={SUPABASE_ORIGIN} crossOrigin="" />
+            <link rel="dns-prefetch" href={SUPABASE_ORIGIN} />
+          </>
+        )}
         <link rel="manifest" href="/manifest.json" />
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="apple-touch-icon" href="/pinkys-logo.jpg" />
@@ -144,7 +164,7 @@ export default function RootLayout({
         <WebSiteSchema />
         <BreadcrumbSchema />
       </head>
-      <body className={inter.className}>
+      <body>
         <TooltipProvider>
           {children}
         </TooltipProvider>

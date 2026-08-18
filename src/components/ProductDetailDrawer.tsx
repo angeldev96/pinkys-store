@@ -1,6 +1,8 @@
+import Image from 'next/image';
 import { X, Plus, Check } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Product } from '@/data/products';
+import { badgeStyles } from './ProductCard';
 
 interface ProductDetailDrawerProps {
   isOpen: boolean;
@@ -8,13 +10,6 @@ interface ProductDetailDrawerProps {
   product: Product | null;
   onAddToCart: (product: Product) => void;
 }
-
-const badgeStyles: Record<string, string> = {
-  'Nuevo': 'bg-blue-500 text-white',
-  'Oferta': 'bg-orange-500 text-white',
-  'Bestseller': 'bg-green-500 text-white',
-  'Premium': 'bg-purple-500 text-white',
-};
 
 export function ProductDetailDrawer({ isOpen, onClose, product, onAddToCart }: ProductDetailDrawerProps) {
   const { isMobile } = useIsMobile();
@@ -39,20 +34,23 @@ export function ProductDetailDrawer({ isOpen, onClose, product, onAddToCart }: P
         <button
           onClick={onClose}
           className="absolute top-4 right-4 z-10 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-lg touch-target fade-in scale-on-active"
+          aria-label={`Cerrar detalle de ${product.name}`}
         >
           <X className="w-6 h-6" />
         </button>
 
         {/* Product Image - Full width */}
         <div className="relative flex-1 bg-gray-50 flex items-center justify-center p-8 fade-in">
-          <img
+          <Image
             src={product.image}
             alt={product.name}
-            className="max-w-full max-h-full object-contain fade-in-scale"
+            fill
+            sizes="100vw"
+            className="object-contain p-8 fade-in-scale"
           />
           {/* Badge */}
           {product.badge && (
-            <span className={`absolute top-4 left-4 px-3 py-1 text-sm font-bold rounded-full shadow-md ${badgeStyles[product.badge] || 'bg-gray-500 text-white'}`}>
+            <span className={`absolute top-4 left-4 px-3 py-1 text-sm font-bold rounded-full shadow-md ${badgeStyles[product.badge] || 'bg-gray-600 text-white'}`}>
               {product.badge}
             </span>
           )}

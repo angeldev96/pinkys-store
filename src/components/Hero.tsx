@@ -16,6 +16,7 @@ const Hero = () => {
           fill
           className="object-cover"
           priority
+          fetchPriority="high"
           sizes="100vw"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-background/90 via-background/80 to-background/60 md:bg-gradient-to-r md:from-background/95 md:via-background/70 md:to-background/40" />

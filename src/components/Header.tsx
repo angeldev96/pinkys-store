@@ -68,7 +68,10 @@ const Header = ({ cartCount, onCartClick, searchQuery, onSearchChange }: HeaderP
             {isMobile && (
               <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
                 <SheetTrigger asChild>
-                  <button className="p-2.5 rounded-full hover:bg-secondary transition-colors">
+                  <button
+                    className="p-2.5 rounded-full hover:bg-secondary transition-colors"
+                    aria-label="Abrir menú de navegación"
+                  >
                     <Menu className="w-5 h-5 text-foreground" />
                   </button>
                 </SheetTrigger>

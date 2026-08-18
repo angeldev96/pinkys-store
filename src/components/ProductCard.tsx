@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { Plus } from 'lucide-react';
 import { Product } from '@/data/products';
 
@@ -7,11 +8,12 @@ interface ProductCardProps {
   onView?: (product: Product) => void;
 }
 
-const badgeStyles: Record<string, string> = {
-  'Nuevo': 'bg-blue-500 text-white',
-  'Oferta': 'bg-orange-500 text-white',
-  'Bestseller': 'bg-green-500 text-white',
-  'Premium': 'bg-purple-500 text-white',
+// Shades chosen so white text keeps a >= 4.5:1 contrast ratio (WCAG AA).
+export const badgeStyles: Record<string, string> = {
+  'Nuevo': 'bg-blue-700 text-white',
+  'Oferta': 'bg-orange-700 text-white',
+  'Bestseller': 'bg-green-700 text-white',
+  'Premium': 'bg-purple-700 text-white',
 };
 
 const ProductCard = ({ product, onAddToCart, onView }: ProductCardProps) => {
@@ -30,22 +32,24 @@ const ProductCard = ({ product, onAddToCart, onView }: ProductCardProps) => {
     >
       {/* Image Container */}
       <div className="relative aspect-square overflow-hidden bg-gray-50">
-        <img
+        <Image
           src={product.image}
           alt={product.name}
-          className={`w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105 ${!inStock ? 'opacity-60 grayscale-[30%]' : ''}`}
-          loading="lazy"
+          fill
+          sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          quality={65}
+          className={`object-cover transition-transform duration-500 ease-out group-hover:scale-105 ${!inStock ? 'opacity-60 grayscale-[30%]' : ''}`}
         />
         {/* Badge */}
         {product.badge && (
-          <span className={`absolute top-2 left-2 px-2 py-0.5 text-[10px] sm:text-xs font-bold rounded-full shadow-sm ${badgeStyles[product.badge] || 'bg-gray-500 text-white'}`}>
+          <span className={`absolute top-2 left-2 px-2 py-0.5 text-[10px] sm:text-xs font-bold rounded-full shadow-sm ${badgeStyles[product.badge] || 'bg-gray-600 text-white'}`}>
             {product.badge}
           </span>
         )}
         {/* Out of Stock Overlay */}
         {!inStock && (
           <div className="absolute bottom-2 left-2 right-2">
-            <span className="block text-center bg-red-500/90 text-white text-[10px] sm:text-xs font-bold py-1 rounded-md">
+            <span className="block text-center bg-red-700/95 text-white text-[10px] sm:text-xs font-bold py-1 rounded-md">
               Agotado
             </span>
           </div>

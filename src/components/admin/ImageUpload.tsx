@@ -54,7 +54,7 @@ export function ImageUpload({ value, onChange, onUploading, onFilePicked, analyz
       const { error: uploadError } = await supabase.storage
         .from('product-images')
         .upload(filePath, file, {
-          cacheControl: '3600',
+          cacheControl: '31536000',
           upsert: false,
         });
 

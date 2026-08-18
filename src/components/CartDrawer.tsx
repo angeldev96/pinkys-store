@@ -1,5 +1,6 @@
 "use client";
 
+import Image from 'next/image';
 import { X, Plus, Minus, ShoppingBag, Trash2, MessageCircle } from 'lucide-react';
 import { CartItem } from '@/data/products';
 
@@ -104,11 +105,13 @@ const CartDrawer = ({
                 >
                   <div className="flex gap-3">
                     {/* Image */}
-                    <div className="w-20 h-20 rounded-lg overflow-hidden shrink-0 bg-gray-100">
-                      <img
+                    <div className="relative w-20 h-20 rounded-lg overflow-hidden shrink-0 bg-gray-100">
+                      <Image
                         src={item.image}
                         alt={item.name}
-                        className="w-full h-full object-cover"
+                        fill
+                        sizes="80px"
+                        className="object-cover"
                       />
                     </div>
 

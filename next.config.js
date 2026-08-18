@@ -23,6 +23,9 @@ const nextConfig = {
       },
     ],
     formats: ['image/avif', 'image/webp'],
+    // Product images are content-addressed (timestamp + random suffix in the
+    // filename), so optimized variants can be cached for a year.
+    minimumCacheTTL: 31536000,
   },
   async headers() {
     return [
