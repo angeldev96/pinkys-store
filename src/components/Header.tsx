@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import * as m from 'motion/react-m';
+import { AnimatePresence } from 'motion/react';
 import { Search, ShoppingBag, User, Menu, Home, Package, Mail, Sparkles, Gem, Droplets, Brush } from 'lucide-react';
 import {
   Sheet,
@@ -12,6 +14,7 @@ import {
 } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { ScrollProgress } from '@/components/ScrollProgress';
 
 interface HeaderProps {
   cartCount: number;
@@ -59,7 +62,13 @@ const Header = ({ cartCount, onCartClick, searchQuery, onSearchChange }: HeaderP
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-md border-b border-border shadow-sm">
+    <m.header
+      initial={{ y: -72, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-primary/10 shadow-[0_4px_24px_-12px_hsl(340_60%_35%/0.35)]"
+    >
+      <ScrollProgress />
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between gap-4">
           {/* Mobile Menu & Logo */}
@@ -123,16 +132,28 @@ const Header = ({ cartCount, onCartClick, searchQuery, onSearchChange }: HeaderP
               </Sheet>
             )}
 
-            <Image
-              src="/pinkys-logo.jpg"
-              alt="Pinky's Store - Tienda de maquillaje y joyería en Honduras"
-              width={48}
-              height={48}
-              className="h-10 sm:h-12 w-10 sm:w-12 object-cover rounded-full border-2 border-primary/20"
-              priority
-            />
+            <m.div
+              whileHover={{ scale: 1.08, rotate: -4 }}
+              whileTap={{ scale: 0.94 }}
+              transition={{ type: 'spring', stiffness: 380, damping: 18 }}
+              className="relative shrink-0"
+            >
+              {/* Soft halo so the logo glows against the aurora. */}
+              <span
+                aria-hidden="true"
+                className="absolute -inset-1 rounded-full bg-gradient-to-tr from-pink-400 via-fuchsia-400 to-amber-300 opacity-60 blur-[6px]"
+              />
+              <Image
+                src="/pinkys-logo.jpg"
+                alt="Pinky's Store - Tienda de maquillaje y joyería en Honduras"
+                width={48}
+                height={48}
+                className="relative h-10 sm:h-12 w-10 sm:w-12 object-cover rounded-full border-2 border-white/70"
+                priority
+              />
+            </m.div>
             <div className="hidden sm:block">
-              <span className="font-display text-xl font-bold text-primary">Pinky&apos;s</span>
+              <span className="font-display text-xl font-bold text-aurora">Pinky&apos;s</span>
               <span className="text-xs text-muted-foreground tracking-widest uppercase block">Store</span>
             </div>
           </div>
@@ -193,22 +214,40 @@ const Header = ({ cartCount, onCartClick, searchQuery, onSearchChange }: HeaderP
             >
               <User className="w-5 h-5 text-foreground" />
             </a>
-            <button
+            <m.button
               onClick={onCartClick}
+              whileHover={{ scale: 1.12 }}
+              whileTap={{ scale: 0.9 }}
+              transition={{ type: 'spring', stiffness: 420, damping: 18 }}
               className="relative p-2.5 rounded-full hover:bg-secondary transition-colors"
               aria-label={`Carrito de compras${cartCount > 0 ? ` (${cartCount} productos)` : ''}`}
             >
               <ShoppingBag className="w-5 h-5 text-foreground" />
-              {cartCount > 0 && (
-                <span className="cart-badge">
-                  {cartCount > 9 ? '9+' : cartCount}
-                </span>
-              )}
-            </button>
+              <AnimatePresence>
+                {cartCount > 0 && (
+                  <m.span
+                    key="badge"
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0, opacity: 0 }}
+                    transition={{ type: 'spring', stiffness: 500, damping: 16 }}
+                    className="absolute -top-1 -right-1 bg-gradient-to-br from-amber-400 to-pink-500 text-white w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center shadow-md"
+                  >
+                    {cartCount > 9 ? '9+' : cartCount}
+                  </m.span>
+                )}
+              </AnimatePresence>
+            </m.button>
           </div>
         </div>
       </div>
-    </header>
+
+      {/* Colour bar that keeps the header tied to the aurora palette. */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-fuchsia-400/60 to-transparent"
+      />
+    </m.header>
   );
 };
 

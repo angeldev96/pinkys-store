@@ -4,6 +4,9 @@ import { useState, useCallback } from 'react';
 import Header from '@/components/Header';
 import Hero from '@/components/Hero';
 import Catalog from '@/components/Catalog';
+import { AuroraBackground } from '@/components/AuroraBackground';
+import { FeatureMarquee } from '@/components/FeatureMarquee';
+import { MotionProvider } from '@/components/motion/MotionProvider';
 import CartDrawer from '@/components/CartDrawer';
 import Footer from '@/components/Footer';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
@@ -34,35 +37,41 @@ export default function Home() {
   }, [addToCart]);
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header
-        cartCount={totalItems}
-        onCartClick={openCart}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-      />
+    <MotionProvider>
+      {/* Transparent wrapper: the fixed aurora sits behind the whole page. */}
+      <div className="relative min-h-screen bg-transparent">
+        <AuroraBackground />
 
-      <main>
-        <Hero />
-        <Catalog
+        <Header
+          cartCount={totalItems}
+          onCartClick={openCart}
           searchQuery={searchQuery}
-          onAddToCart={handleAddToCart}
+          onSearchChange={setSearchQuery}
         />
-      </main>
 
-      <Footer />
+        <main>
+          <Hero />
+          <FeatureMarquee />
+          <Catalog
+            searchQuery={searchQuery}
+            onAddToCart={handleAddToCart}
+          />
+        </main>
 
-      <CartDrawer
-        isOpen={isCartOpen}
-        onClose={closeCart}
-        items={cartItems}
-        onUpdateQuantity={updateQuantity}
-        onRemove={removeFromCart}
-        totalPrice={totalPrice}
-      />
+        <Footer />
 
-      <WhatsAppButton />
-      <CartToast key={toastKey} message={toastMessage} />
-    </div>
+        <CartDrawer
+          isOpen={isCartOpen}
+          onClose={closeCart}
+          items={cartItems}
+          onUpdateQuantity={updateQuantity}
+          onRemove={removeFromCart}
+          totalPrice={totalPrice}
+        />
+
+        <WhatsAppButton />
+        <CartToast key={toastKey} message={toastMessage} />
+      </div>
+    </MotionProvider>
   );
 }

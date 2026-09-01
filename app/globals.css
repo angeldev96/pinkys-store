@@ -137,11 +137,14 @@
   }
 
   .filter-tab.active {
-    @apply bg-primary text-primary-foreground;
+    @apply text-primary-foreground shadow-lg shadow-primary/25;
+    background-image: linear-gradient(120deg, hsl(340 65% 42%), hsl(315 70% 50%), hsl(340 65% 42%));
+    background-size: 200% 100%;
+    animation: aurora-text 6s linear infinite;
   }
 
   .filter-tab:not(.active) {
-    @apply bg-secondary text-secondary-foreground hover:bg-primary/10;
+    @apply bg-card/70 backdrop-blur-sm text-secondary-foreground ring-1 ring-primary/10 hover:bg-primary/10;
   }
 
   .sparkle {
@@ -318,5 +321,199 @@
 
   .pull-to-refresh {
     animation: spin 1s linear infinite;
+  }
+}
+
+/* ============================================================
+   Aurora background + ambient motion
+   Transform/opacity only so the blobs stay on the compositor.
+   ============================================================ */
+@layer components {
+  .aurora-layer {
+    position: fixed;
+    inset: 0;
+    z-index: -10;
+    overflow: hidden;
+    pointer-events: none;
+    background:
+      radial-gradient(120% 80% at 50% -10%, hsl(350 100% 98%) 0%, transparent 60%),
+      hsl(var(--background));
+  }
+
+  .aurora-blob {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(56px);
+    will-change: transform;
+    transform: translateZ(0);
+  }
+
+  @media (min-width: 768px) {
+    .aurora-blob {
+      filter: blur(80px);
+    }
+  }
+
+  /* A soft grid so the empty space reads as designed, not blank. */
+  .aurora-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(to right, hsl(340 60% 35% / 0.045) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(340 60% 35% / 0.045) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(100% 60% at 50% 0%, #000 0%, transparent 75%);
+    -webkit-mask-image: radial-gradient(100% 60% at 50% 0%, #000 0%, transparent 75%);
+  }
+
+  @keyframes aurora-drift-a {
+    0%   { transform: translate3d(0, 0, 0) scale(1); }
+    50%  { transform: translate3d(6vw, 8vh, 0) scale(1.18); }
+    100% { transform: translate3d(-4vw, -5vh, 0) scale(0.95); }
+  }
+
+  @keyframes aurora-drift-b {
+    0%   { transform: translate3d(0, 0, 0) scale(1.05); }
+    50%  { transform: translate3d(-8vw, 6vh, 0) scale(0.9); }
+    100% { transform: translate3d(5vw, -7vh, 0) scale(1.2); }
+  }
+
+  @keyframes aurora-drift-c {
+    0%   { transform: translate3d(0, 0, 0) scale(0.95) rotate(0deg); }
+    50%  { transform: translate3d(7vw, -6vh, 0) scale(1.15) rotate(25deg); }
+    100% { transform: translate3d(-6vw, 4vh, 0) scale(1) rotate(-15deg); }
+  }
+
+  .aurora-a { animation: aurora-drift-a 22s ease-in-out infinite alternate; }
+  .aurora-b { animation: aurora-drift-b 28s ease-in-out infinite alternate; }
+  .aurora-c { animation: aurora-drift-c 34s ease-in-out infinite alternate; }
+
+  /* Animated multi-colour text fill for headline accents. */
+  .text-aurora {
+    /* Every stop stays dark enough to clear 4.5:1 on the light background. */
+    background-image: linear-gradient(
+      100deg,
+      hsl(340 70% 40%) 0%,
+      hsl(318 78% 42%) 22%,
+      hsl(35 92% 33%) 45%,
+      hsl(280 65% 45%) 68%,
+      hsl(340 70% 40%) 100%
+    );
+    background-size: 250% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: aurora-text 9s linear infinite;
+  }
+
+  @keyframes aurora-text {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 250% 50%; }
+  }
+
+  /* Glow that breathes behind the primary CTA. */
+  .cta-glow {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .cta-glow::before {
+    content: "";
+    position: absolute;
+    inset: -6px;
+    border-radius: 9999px;
+    background: linear-gradient(120deg, hsl(340 70% 55%), hsl(300 75% 60%), hsl(40 80% 60%), hsl(340 70% 55%));
+    background-size: 300% 300%;
+    filter: blur(12px);
+    opacity: 0.55;
+    z-index: -1;
+    animation: aurora-text 7s linear infinite;
+  }
+
+  /* Diagonal light sweep across a card on hover. */
+  .shine::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -120%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(
+      100deg,
+      transparent 0%,
+      hsl(0 0% 100% / 0.55) 50%,
+      transparent 100%
+    );
+    transform: skewX(-18deg);
+    pointer-events: none;
+    transition: left 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .group:hover .shine::after {
+    left: 140%;
+  }
+
+  /* Infinite benefits marquee. */
+  @keyframes marquee-x {
+    from { transform: translate3d(0, 0, 0); }
+    to   { transform: translate3d(-50%, 0, 0); }
+  }
+
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marquee-x 32s linear infinite;
+    will-change: transform;
+  }
+
+  .marquee-mask {
+    mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  }
+
+  /* Pulsing halo for the floating WhatsApp button. */
+  @keyframes halo {
+    0%   { transform: scale(1); opacity: 0.55; }
+    70%  { transform: scale(1.8); opacity: 0; }
+    100% { transform: scale(1.8); opacity: 0; }
+  }
+
+  .halo-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    animation: halo 2.6s ease-out infinite;
+    pointer-events: none;
+  }
+
+  /* Slow float for decorative sparkles. */
+  @keyframes drift-float {
+    0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+    33%      { transform: translate3d(6px, -12px, 0) rotate(8deg); }
+    66%      { transform: translate3d(-8px, -6px, 0) rotate(-6deg); }
+  }
+
+  .drift-float { animation: drift-float 9s ease-in-out infinite; }
+}
+
+/* Anyone who asked for calm gets a still page. */
+@media (prefers-reduced-motion: reduce) {
+  .aurora-a,
+  .aurora-b,
+  .aurora-c,
+  .marquee-track,
+  .text-aurora,
+  .cta-glow::before,
+  .filter-tab.active,
+  .halo-ring,
+  .drift-float,
+  .sparkle,
+  .animate-float,
+  .animate-shimmer {
+    animation: none !important;
+  }
+
+  html {
+    scroll-behavior: auto;
   }
 }

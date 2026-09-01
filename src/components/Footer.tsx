@@ -3,8 +3,18 @@ import { Instagram, Facebook, Mail, MapPin, Heart } from 'lucide-react';
 
 const Footer = () => {
   return (
-    <footer id="contact" className="bg-foreground text-primary-foreground">
-      <div className="container mx-auto px-4 py-12">
+    <footer id="contact" className="relative overflow-hidden bg-foreground text-primary-foreground">
+      {/* Aurora edge so the dark footer doesn't cut the page off flatly. */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-fuchsia-400 to-transparent"
+      />
+      <div
+        aria-hidden="true"
+        className="aurora-blob aurora-c -top-40 left-1/2 h-72 w-[70vw] -translate-x-1/2 opacity-40"
+        style={{ background: 'radial-gradient(circle, hsl(320 90% 60% / 0.55), transparent 70%)' }}
+      />
+      <div className="relative container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand */}
           <div>
@@ -32,7 +42,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Seguir a Pinky's Store en Instagram"
-                className="p-2 bg-primary-foreground/10 rounded-full hover:bg-primary-foreground/20 transition-colors"
+                className="p-2 bg-primary-foreground/10 rounded-full hover:bg-primary-foreground/25 hover:scale-110 hover:-translate-y-0.5 transition-all duration-300"
               >
                 <Instagram className="w-4 h-4" />
               </a>
@@ -41,7 +51,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Seguir a Pinky's Store en Facebook"
-                className="p-2 bg-primary-foreground/10 rounded-full hover:bg-primary-foreground/20 transition-colors"
+                className="p-2 bg-primary-foreground/10 rounded-full hover:bg-primary-foreground/25 hover:scale-110 hover:-translate-y-0.5 transition-all duration-300"
               >
                 <Facebook className="w-4 h-4" />
               </a>
@@ -53,17 +63,17 @@ const Footer = () => {
             <h4 className="font-display font-semibold text-lg mb-4">Enlaces</h4>
             <ul className="space-y-2">
               <li>
-                <a href="#hero" className="text-primary-foreground/70 hover:text-primary-foreground text-sm transition-colors">
+                <a href="#hero" className="inline-block text-primary-foreground/70 hover:text-primary-foreground hover:translate-x-1 text-sm transition-all duration-300">
                   Inicio
                 </a>
               </li>
               <li>
-                <a href="#catalog" className="text-primary-foreground/70 hover:text-primary-foreground text-sm transition-colors">
+                <a href="#catalog" className="inline-block text-primary-foreground/70 hover:text-primary-foreground hover:translate-x-1 text-sm transition-all duration-300">
                   Productos
                 </a>
               </li>
               <li>
-                <a href="#catalog" className="text-primary-foreground/70 hover:text-primary-foreground text-sm transition-colors">
+                <a href="#catalog" className="inline-block text-primary-foreground/70 hover:text-primary-foreground hover:translate-x-1 text-sm transition-all duration-300">
                   Catálogo
                 </a>
               </li>
@@ -75,7 +85,7 @@ const Footer = () => {
             <h4 className="font-display font-semibold text-lg mb-4">Ayuda</h4>
             <ul className="space-y-2">
               <li>
-                <a href="#contact" className="text-primary-foreground/70 hover:text-primary-foreground text-sm transition-colors">
+                <a href="#contact" className="inline-block text-primary-foreground/70 hover:text-primary-foreground hover:translate-x-1 text-sm transition-all duration-300">
                   Contacto
                 </a>
               </li>
@@ -84,7 +94,7 @@ const Footer = () => {
                   href="https://wa.me/50495825388"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-primary-foreground/70 hover:text-primary-foreground text-sm transition-colors"
+                  className="inline-block text-primary-foreground/70 hover:text-primary-foreground hover:translate-x-1 text-sm transition-all duration-300"
                 >
                   WhatsApp
                 </a>

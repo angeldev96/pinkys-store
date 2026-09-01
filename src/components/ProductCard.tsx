@@ -1,11 +1,16 @@
+"use client";
+
 import Image from 'next/image';
 import { Plus } from 'lucide-react';
+import * as m from 'motion/react-m';
 import { Product } from '@/data/products';
 
 interface ProductCardProps {
   product: Product;
   onAddToCart: (product: Product) => void;
   onView?: (product: Product) => void;
+  /** Position in the grid; used to stagger the scroll-in animation. */
+  index?: number;
 }
 
 // Shades chosen so white text keeps a >= 4.5:1 contrast ratio (WCAG AA).
@@ -16,7 +21,7 @@ export const badgeStyles: Record<string, string> = {
   'Premium': 'bg-purple-700 text-white',
 };
 
-const ProductCard = ({ product, onAddToCart, onView }: ProductCardProps) => {
+const ProductCard = ({ product, onAddToCart, onView, index = 0 }: ProductCardProps) => {
   const handleCardClick = () => {
     if (onView) {
       onView(product);
@@ -26,12 +31,19 @@ const ProductCard = ({ product, onAddToCart, onView }: ProductCardProps) => {
   const inStock = (product.stock ?? 0) > 0;
 
   return (
-    <article
+    <m.article
       onClick={handleCardClick}
-      className="group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer fade-in"
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.15 }}
+      // Stagger resets every row-of-eight so late products don't wait seconds.
+      transition={{ duration: 0.5, delay: (index % 8) * 0.05, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={{ y: -6 }}
+      whileTap={{ scale: 0.985 }}
+      className="group relative bg-white/90 backdrop-blur-sm rounded-xl shadow-sm border border-white/60 ring-1 ring-primary/5 overflow-hidden hover:shadow-[0_18px_40px_-12px_hsl(340_60%_35%/0.35)] transition-shadow duration-300 cursor-pointer"
     >
       {/* Image Container */}
-      <div className="relative aspect-square overflow-hidden bg-gray-50">
+      <div className="relative aspect-square overflow-hidden bg-gray-50 shine">
         <Image
           src={product.image}
           alt={product.name}
@@ -73,24 +85,27 @@ const ProductCard = ({ product, onAddToCart, onView }: ProductCardProps) => {
           <span className="text-lg sm:text-xl font-bold text-pink-600 transition-transform duration-200 group-hover:scale-105">
             L{product.price.toFixed(2)}
           </span>
-          <button
+          <m.button
             onClick={(e) => {
               e.stopPropagation();
               if (inStock) onAddToCart(product);
             }}
             disabled={!inStock}
-            className={`p-2 rounded-lg transition-all duration-200 scale-on-active shrink-0 shadow-md ${
+            whileHover={inStock ? { scale: 1.12, rotate: 90 } : undefined}
+            whileTap={inStock ? { scale: 0.9 } : undefined}
+            transition={{ type: 'spring', stiffness: 420, damping: 18 }}
+            className={`p-2 rounded-lg shrink-0 shadow-md ${
               inStock
-                ? 'bg-pink-600 hover:bg-pink-700 text-white hover:shadow-lg'
+                ? 'bg-gradient-to-br from-pink-500 to-fuchsia-600 text-white hover:shadow-lg hover:shadow-pink-500/30'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed shadow-none'
             }`}
             aria-label={inStock ? `Agregar ${product.name} al carrito` : `${product.name} agotado`}
           >
             <Plus className="w-5 h-5" />
-          </button>
+          </m.button>
         </div>
       </div>
-    </article>
+    </m.article>
   );
 };
 
